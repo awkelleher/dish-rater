@@ -1,147 +1,164 @@
 import Link from 'next/link'
 import Image from 'next/image'
+import DarkNavBar from './components/DarkNavBar'
+
+const QUICK_CATEGORIES = [
+  { name: 'Tacos', emoji: '🌮', category: 'Taco' },
+  { name: 'Pizza', emoji: '🍕', category: 'Pizza' },
+  { name: 'Burgers', emoji: '🍔', category: 'Burger' },
+  { name: 'Ramen', emoji: '🍜', category: 'Ramen' },
+]
+
+const POPULAR_NEIGHBORHOODS = [
+  'Downtown', 'Paulus Hook', 'Journal Square', 
+  'The Heights', 'Newport', 'Grove Street'
+]
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50">
-      {/* Header */}
-      <header className="container mx-auto px-4 py-6">
-        <nav className="flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <Image 
-              src="/logo.svg" 
-              alt="Hood Eats" 
-              width={120} 
-              height={120}
-              className="w-auto h-16"
-            />
-          </div>
-          <div className="flex gap-4">
-            <Link 
-              href="/auth/login"
-              className="text-gray-700 hover:text-black transition-colors font-medium"
-            >
-              Log in
-            </Link>
-            <Link 
-              href="/auth/signup"
-              className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors font-medium"
-            >
-              Sign up
-            </Link>
-          </div>
-        </nav>
-      </header>
+    <div className="min-h-screen bg-zinc-900 text-white">
+      {/* Navigation */}
+      <DarkNavBar />
 
-      {/* Hero Section */}
+      {/* Hero - Action First */}
       <main className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto text-center pt-20 pb-16">
-          {/* Logo */}
-          <div className="mb-8 flex justify-center">
-            <Image 
-              src="/logo.svg" 
-              alt="Hood Eats - Bite the Block" 
-              width={600} 
-              height={600}
-              className="w-full max-w-2xl h-auto"
-              priority
-            />
-          </div>
-
-          {/* Tagline */}
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-orange-600 via-orange-500 to-red-600 bg-clip-text text-transparent">
-            Rate every taco in Jersey City
+        <div className="max-w-4xl mx-auto pt-16 pb-12">
+          {/* Main Value Prop */}
+          <h1 className="text-5xl md:text-7xl font-black mb-4 leading-tight">
+            Find something
+            <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">
+              reliably good
+            </span>
+            <br />
+            in 30 seconds
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-600 mb-12 max-w-2xl mx-auto">
-            Discover the best tacos in your neighborhood. Rate what you've tried. 
-            Help others find their next favorite bite.
+          <p className="text-xl text-zinc-400 mb-12 max-w-2xl">
+            Real ratings from real people in your hood. No BS, just good food.
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {/* Quick Action Cards */}
+          <div className="grid md:grid-cols-2 gap-4 mb-12">
+            {/* Top 10 Quick Hit */}
             <Link 
-              href="/explore"
-              className="bg-gradient-to-r from-orange-600 to-red-600 text-white px-8 py-4 rounded-xl text-lg font-bold hover:from-orange-700 hover:to-red-700 transition-all transform hover:scale-105 shadow-lg"
+              href="/explore?view=best-of&limit=10"
+              className="group relative overflow-hidden bg-gradient-to-br from-orange-600 to-red-700 rounded-2xl p-8 hover:scale-[1.02] transition-transform"
             >
-              🌮 Explore Tacos
-            </Link>
-            <Link 
-              href="/restaurants/new"
-              className="bg-white text-gray-900 px-8 py-4 rounded-xl text-lg font-bold hover:bg-gray-50 transition-all border-2 border-gray-200 hover:border-gray-300"
-            >
-              Add a Taco
-            </Link>
-          </div>
-        </div>
-
-        {/* How It Works */}
-        <div className="max-w-6xl mx-auto py-20">
-          <h2 className="text-4xl font-bold text-center mb-16">How It Works</h2>
-          
-          <div className="grid md:grid-cols-3 gap-12">
-            <div className="text-center">
-              <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-2xl font-bold mb-3">Discover</h3>
-              <p className="text-gray-600">
-                Browse tacos by neighborhood or check out the top-rated spots in Jersey City
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="text-6xl mb-4">⭐</div>
-              <h3 className="text-2xl font-bold mb-3">Rate</h3>
-              <p className="text-gray-600">
-                Give each taco a score from 0-10. Share photos and reviews to help others decide
-              </p>
-            </div>
-
-            <div className="text-center">
-              <div className="text-6xl mb-4">🌮</div>
-              <h3 className="text-2xl font-bold mb-3">Contribute</h3>
-              <p className="text-gray-600">
-                Add new taco spots and dishes. Help build the most comprehensive taco guide in JC
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Neighborhoods Section */}
-        <div className="max-w-6xl mx-auto py-20">
-          <h2 className="text-4xl font-bold text-center mb-8">Every Hood, Every Bite</h2>
-          <p className="text-xl text-gray-600 text-center mb-12">
-            From Downtown to Greenville, we're covering all of Jersey City
-          </p>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            {['Downtown', 'Journal Square', 'The Heights', 'Bergen-Lafayette', 
-              'Greenville', 'West Side', 'The Waterfront', 'McGinley Square'].map((hood) => (
-              <div key={hood} className="bg-white rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
-                <span className="font-semibold text-gray-800">{hood}</span>
+              <div className="relative z-10">
+                <div className="text-4xl mb-3">⚡</div>
+                <h3 className="text-2xl font-bold mb-2">Top 10 in JC</h3>
+                <p className="text-orange-100">Highest rated dishes right now</p>
               </div>
-            ))}
+              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
+            </Link>
+
+            {/* Find by Location */}
+            <Link 
+              href="/explore?view=neighborhood"
+              className="group relative overflow-hidden bg-zinc-800 border-2 border-zinc-700 hover:border-orange-500 rounded-2xl p-8 hover:scale-[1.02] transition-all"
+            >
+              <div className="relative z-10">
+                <div className="text-4xl mb-3">📍</div>
+                <h3 className="text-2xl font-bold mb-2">By Neighborhood</h3>
+                <p className="text-zinc-400">What's good near you?</p>
+              </div>
+            </Link>
+          </div>
+
+          {/* Quick Category Pills */}
+          <div className="mb-12">
+            <p className="text-sm text-zinc-500 uppercase tracking-wider mb-4">Quick Search</p>
+            <div className="flex flex-wrap gap-3">
+              {QUICK_CATEGORIES.map((cat) => (
+                <Link
+                  key={cat.category}
+                  href={`/explore?view=category&category=${cat.category}`}
+                  className="px-5 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-semibold transition-colors border border-zinc-700 hover:border-orange-500"
+                >
+                  {cat.emoji} {cat.name}
+                </Link>
+              ))}
+              <Link
+                href="/explore?view=best-of"
+                className="px-5 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-semibold transition-colors border border-zinc-700 hover:border-yellow-500"
+              >
+                ⭐ Best Of
+              </Link>
+            </div>
+          </div>
+
+          {/* Popular Neighborhoods - Quick Access */}
+          <div className="border-t border-zinc-800 pt-8">
+            <p className="text-sm text-zinc-500 uppercase tracking-wider mb-4">Popular Hoods</p>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {POPULAR_NEIGHBORHOODS.map((hood) => (
+                <Link
+                  key={hood}
+                  href={`/explore?view=neighborhood&neighborhood=${encodeURIComponent(hood)}`}
+                  className="px-4 py-3 bg-zinc-800/50 hover:bg-zinc-800 rounded-lg text-sm font-medium transition-colors text-center border border-zinc-800 hover:border-zinc-700"
+                >
+                  {hood}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* CTA Section */}
-        <div className="max-w-4xl mx-auto text-center py-20">
-          <h2 className="text-4xl font-bold mb-6">Ready to bite the block?</h2>
-          <p className="text-xl text-gray-600 mb-8">
-            Join the community and start rating tacos today
-          </p>
+        {/* How It Works - Minimal */}
+        <div className="max-w-6xl mx-auto py-20 border-t border-zinc-800">
+          <div className="grid md:grid-cols-3 gap-12">
+            <div>
+              <div className="text-3xl mb-3">🔍</div>
+              <h3 className="text-xl font-bold mb-2">Find</h3>
+              <p className="text-zinc-400 text-sm">
+                Search by hood, dish type, or just browse the top-rated
+              </p>
+            </div>
+
+            <div>
+              <div className="text-3xl mb-3">⭐</div>
+              <h3 className="text-xl font-bold mb-2">Trust</h3>
+              <p className="text-zinc-400 text-sm">
+                Real ratings from people who actually ate there
+              </p>
+            </div>
+
+            <div>
+              <div className="text-3xl mb-3">🍽️</div>
+              <h3 className="text-xl font-bold mb-2">Eat</h3>
+              <p className="text-zinc-400 text-sm">
+                No more wasting money on mid food
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Final CTA */}
+        <div className="max-w-4xl mx-auto text-center py-20 border-t border-zinc-800">
+          <h2 className="text-4xl font-bold mb-4">Hungry right now?</h2>
+          <p className="text-zinc-400 mb-8">Stop scrolling. Start eating.</p>
           <Link 
-            href="/auth/signup"
-            className="inline-block bg-gradient-to-r from-orange-600 to-red-600 text-white px-12 py-4 rounded-xl text-xl font-bold hover:from-orange-700 hover:to-red-700 transition-all transform hover:scale-105 shadow-lg"
+            href="/explore?view=best-of&limit=10"
+            className="inline-block bg-gradient-to-r from-orange-600 to-red-600 text-white px-8 py-4 rounded-xl text-lg font-bold hover:from-orange-700 hover:to-red-700 transition-all"
           >
-            Get Started
+            Show Me Top 10
           </Link>
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t bg-white mt-20">
-        <div className="container mx-auto px-4 py-8 text-center text-gray-600">
-          <p>© 2025 Hood Eats. Bite the Block. 🌮</p>
+      {/* Footer - Minimal */}
+      <footer className="border-t border-zinc-800 bg-black">
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-zinc-500 text-sm">© 2025 Hood Eats. Jersey City.</p>
+            <Link 
+              href="/auth/signup"
+              className="text-sm text-zinc-400 hover:text-white transition-colors"
+            >
+              Add your spot →
+            </Link>
+          </div>
         </div>
       </footer>
     </div>

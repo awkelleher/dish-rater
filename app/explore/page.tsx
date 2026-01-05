@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
-import Header from '../components/Header'
+import DarkNavBar from '../components/DarkNavBar'
 
 const DISH_TYPES = [
   { name: 'Tacos', emoji: '🌮', category: 'Taco' },
@@ -18,12 +18,14 @@ export default async function ExplorePage({
     view?: string
     neighborhood?: string
     category?: string
+    limit?: string
   }
 }) {
   const supabase = await createClient()
   const view = searchParams.view || 'all'
   const selectedNeighborhood = searchParams.neighborhood
   const selectedCategory = searchParams.category || 'Taco'
+  const limit = searchParams.limit ? parseInt(searchParams.limit) : 50
 
   // Fetch dishes based on view
   let dishes: any[] = []
@@ -101,8 +103,8 @@ export default async function ExplorePage({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <div className="min-h-screen bg-zinc-900 text-white">
+      <DarkNavBar />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
