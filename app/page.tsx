@@ -9,7 +9,7 @@ export default function LandingPage() {
         <nav className="flex justify-between items-center">
           <div className="flex items-center gap-3">
             <Image 
-              src="/logo.jpg" 
+              src="/logo.svg" 
               alt="Hood Eats" 
               width={120} 
               height={120}
@@ -39,7 +39,7 @@ export default function LandingPage() {
           {/* Logo */}
           <div className="mb-8 flex justify-center">
             <Image 
-              src="/logo.jpg" 
+              src="/logo.svg" 
               alt="Hood Eats - Bite the Block" 
               width={600} 
               height={600}
