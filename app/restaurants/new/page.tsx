@@ -21,6 +21,7 @@ export default function NewDishPage() {
     restaurantName: '',
     neighborhood: '',
     dishName: '',
+    category: 'Taco',
     rating: 0,
   })
 
@@ -83,7 +84,7 @@ export default function NewDishPage() {
               city: 'Jersey City',
               state: 'NJ',
               neighborhood: formData.neighborhood || null,
-              cuisine_type: ['Mexican', 'Tacos'],
+              cuisine_type: [formData.category], // Use selected category
               created_by: user?.id || null,
             })
             .select()
@@ -100,7 +101,7 @@ export default function NewDishPage() {
         .insert({
           restaurant_id: restaurant.id,
           name: formData.dishName,
-          category: 'Taco',
+          category: formData.category,
           added_by: user?.id || null,
         })
         .select()
@@ -155,8 +156,8 @@ export default function NewDishPage() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Add a Taco</h1>
-          <p className="text-gray-600">Add a Jersey City taco to DishRate</p>
+          <h1 className="text-4xl font-bold mb-2">Add a Dish</h1>
+          <p className="text-gray-600">Add a dish from Jersey City</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6 space-y-6">
@@ -183,6 +184,31 @@ export default function NewDishPage() {
             <p className="text-xs text-gray-500 mt-1">
               Start typing to see existing restaurants
             </p>
+          </div>
+
+          <div>
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+              Dish Type *
+            </label>
+            <select
+              id="category"
+              required
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+            >
+              <option value="Taco">🌮 Taco</option>
+              <option value="Pizza">🍕 Pizza</option>
+              <option value="Ramen">🍜 Ramen</option>
+              <option value="Burger">🍔 Burger</option>
+              <option value="Sandwich">🥪 Sandwich</option>
+              <option value="Sushi">🍣 Sushi</option>
+              <option value="Chinese">🥡 Chinese</option>
+              <option value="Indian">🍛 Indian</option>
+              <option value="Thai">🍲 Thai</option>
+              <option value="Italian">🍝 Italian</option>
+              <option value="Other">🍽️ Other</option>
+            </select>
           </div>
 
           <div>
@@ -316,7 +342,7 @@ export default function NewDishPage() {
               disabled={loading}
               className="flex-1 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
             >
-              {loading ? 'Adding...' : 'Add Taco'}
+              {loading ? 'Adding...' : 'Add Dish'}
             </button>
             <Link
               href="/explore"
