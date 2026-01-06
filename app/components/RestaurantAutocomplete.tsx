@@ -7,12 +7,14 @@ interface RestaurantAutocompleteProps {
   value: string
   onChange: (value: string, restaurantId?: string) => void
   onNeighborhoodSelect?: (neighborhood: string) => void
+  onAreaSelect?: (area: string) => void
 }
 
-export default function RestaurantAutocomplete({ 
-  value, 
+export default function RestaurantAutocomplete({
+  value,
   onChange,
-  onNeighborhoodSelect 
+  onNeighborhoodSelect,
+  onAreaSelect
 }: RestaurantAutocompleteProps) {
   const supabase = createClient()
   const [suggestions, setSuggestions] = useState<any[]>([])
@@ -42,7 +44,7 @@ export default function RestaurantAutocomplete({
       setLoading(true)
       const { data } = await supabase
         .from('restaurants')
-        .select('id, name, neighborhood')
+        .select('id, name, neighborhood, area')
         .eq('city', 'Jersey City')
         .ilike('name', `%${value}%`)
         .limit(5)
@@ -60,6 +62,9 @@ export default function RestaurantAutocomplete({
     onChange(restaurant.name, restaurant.id)
     if (onNeighborhoodSelect && restaurant.neighborhood) {
       onNeighborhoodSelect(restaurant.neighborhood)
+    }
+    if (onAreaSelect && restaurant.area) {
+      onAreaSelect(restaurant.area)
     }
     setShowSuggestions(false)
     setSuggestions([])
@@ -89,8 +94,8 @@ export default function RestaurantAutocomplete({
               className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b last:border-b-0"
             >
               <div className="font-medium text-gray-900">{restaurant.name}</div>
-              {restaurant.neighborhood && (
-                <div className="text-sm text-gray-500">{restaurant.neighborhood}</div>
+              {restaurant.area && (
+                <div className="text-sm text-gray-500">{restaurant.area}</div>
               )}
             </button>
           ))}

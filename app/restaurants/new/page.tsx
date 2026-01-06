@@ -19,9 +19,8 @@ export default function NewDishPage() {
 
   const [formData, setFormData] = useState({
     restaurantName: '',
-    neighborhood: '',
+    area: '',
     dishName: '',
-    category: 'Taco',
     rating: 0,
   })
 
@@ -83,8 +82,7 @@ export default function NewDishPage() {
               address: '', // No longer collecting
               city: 'Jersey City',
               state: 'NJ',
-              neighborhood: formData.neighborhood || null,
-              cuisine_type: [formData.category], // Use selected category
+              area: formData.area,
               created_by: user?.id || null,
             })
             .select()
@@ -101,7 +99,6 @@ export default function NewDishPage() {
         .insert({
           restaurant_id: restaurant.id,
           name: formData.dishName,
-          category: formData.category,
           added_by: user?.id || null,
         })
         .select()
@@ -177,8 +174,8 @@ export default function NewDishPage() {
                 setFormData({ ...formData, restaurantName: name })
                 setSelectedRestaurantId(id || null)
               }}
-              onNeighborhoodSelect={(neighborhood) => {
-                setFormData({ ...formData, neighborhood })
+              onAreaSelect={(area) => {
+                setFormData({ ...formData, area })
               }}
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -187,100 +184,23 @@ export default function NewDishPage() {
           </div>
 
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
-              Dish Type *
+            <label htmlFor="area" className="block text-sm font-medium text-gray-700 mb-2">
+              Area *
             </label>
             <select
-              id="category"
+              id="area"
               required
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              value={formData.area}
+              onChange={(e) => setFormData({ ...formData, area: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
             >
-              <option value="Taco">🌮 Taco</option>
-              <option value="Pizza">🍕 Pizza</option>
-              <option value="Ramen">🍜 Ramen</option>
-              <option value="Burger">🍔 Burger</option>
-              <option value="Sandwich">🥪 Sandwich</option>
-              <option value="Sushi">🍣 Sushi</option>
-              <option value="Chinese">🥡 Chinese</option>
-              <option value="Indian">🍛 Indian</option>
-              <option value="Thai">🍲 Thai</option>
-              <option value="Italian">🍝 Italian</option>
-              <option value="Other">🍽️ Other</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="neighborhood" className="block text-sm font-medium text-gray-700 mb-2">
-              Neighborhood
-            </label>
-            <select
-              id="neighborhood"
-              value={formData.neighborhood}
-              onChange={(e) => setFormData({ ...formData, neighborhood: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-            >
-              <option value="">Select a neighborhood</option>
-              
-              <optgroup label="Bergen-Lafayette">
-                <option value="Beacon">Beacon</option>
-                <option value="Bergen Hill">Bergen Hill</option>
-                <option value="Communipaw">Communipaw</option>
-                <option value="The Junction">The Junction</option>
-                <option value="Jackson Hill">Jackson Hill</option>
-              </optgroup>
-              
-              <optgroup label="The Heights">
-                <option value="Central Avenue">Central Avenue</option>
-                <option value="Chelsea">Chelsea</option>
-                <option value="Sparrow Hill">Sparrow Hill</option>
-                <option value="Transfer Station">Transfer Station</option>
-                <option value="Washington Village">Washington Village</option>
-                <option value="Western Slope">Western Slope</option>
-              </optgroup>
-              
-              <optgroup label="Historic Downtown">
-                <option value="Grove Street">Grove Street</option>
-                <option value="Hamilton Park">Hamilton Park</option>
-                <option value="Harsimus">Harsimus</option>
-                <option value="Boyle Plaza">Boyle Plaza</option>
-                <option value="Van Vorst Park">Van Vorst Park</option>
-                <option value="The Village">The Village</option>
-                <option value="West End">West End</option>
-                <option value="Hudson Waterfront">Hudson Waterfront</option>
-                <option value="Exchange Place">Exchange Place / Colgate Center</option>
-                <option value="Harborside Financial Center">Harborside Financial Center</option>
-                <option value="Newport">Newport</option>
-                <option value="Paulus Hook">Paulus Hook</option>
-                <option value="Powerhouse Arts District">Powerhouse Arts District</option>
-              </optgroup>
-              
-              <optgroup label="Greenville">
-                <option value="Curries Woods">Curries Woods</option>
-                <option value="Port Liberte">Port Liberte</option>
-                <option value="Country Village">Country Village</option>
-                <option value="Claremont">Claremont</option>
-              </optgroup>
-              
-              <optgroup label="Journal Square">
-                <option value="Bergen Square">Bergen Square</option>
-                <option value="Five Corners">Five Corners</option>
-                <option value="The Hilltop">The Hilltop</option>
-                <option value="India Square">India Square</option>
-                <option value="The Island">The Island</option>
-                <option value="Marion">Marion</option>
-                <option value="McGinley Square">McGinley Square</option>
-              </optgroup>
-              
-              <optgroup label="West Side">
-                <option value="Hackensack Riverfront">Hackensack Riverfront</option>
-                <option value="Croxton">Croxton</option>
-                <option value="Droyer's Point">Droyer's Point</option>
-                <option value="Lincoln Park">Lincoln Park / West Bergen</option>
-                <option value="Riverbend">Riverbend</option>
-                <option value="Society Hill">Society Hill</option>
-              </optgroup>
+              <option value="">Select an area</option>
+              <option value="Downtown">Downtown</option>
+              <option value="Journal Square">Journal Square</option>
+              <option value="Heights">Heights</option>
+              <option value="West Side">West Side</option>
+              <option value="Bergen-Lafayette">Bergen-Lafayette</option>
+              <option value="Greenville">Greenville</option>
             </select>
           </div>
 
