@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Database } from '@/types/database.types'
+import UserBadge from './UserBadge'
 
 type Profile = Database['public']['Tables']['profiles']['Row'] | null
 
@@ -41,12 +42,13 @@ export default async function Header() {
           <Link href="/restaurants/new" className="text-gray-700 hover:text-black transition-colors font-medium">
             Add Dish
           </Link>
-          {user && profile ? (
-            <div className="flex items-center gap-3">
-              <span className="text-gray-900 font-medium">
-                {(profile as Profile)?.full_name || (profile as Profile)?.username}
-              </span>
-            </div>
+          {user ? (
+            <UserBadge
+              userId={user.id}
+              fullName={(profile as Profile)?.full_name}
+              username={(profile as Profile)?.username || user.email?.split('@')[0] || 'User'}
+              variant="light"
+            />
           ) : (
             <Link 
               href="/auth/login" 
