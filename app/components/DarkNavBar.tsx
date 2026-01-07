@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import Image from 'next/image'
+import UserBadge from './UserBadge'
 
 export default async function DarkNavBar() {
   const supabase = await createClient()
@@ -40,11 +41,11 @@ export default async function DarkNavBar() {
               href="/explore?view=neighborhood"
               className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-lg transition-colors"
             >
-              Neighborhoods
+              Areas
             </Link>
             
             <Link
-              href="/explore?view=best-of"
+              href="/best-of"
               className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-lg transition-colors"
             >
               Best Of
@@ -67,13 +68,13 @@ export default async function DarkNavBar() {
 
           {/* User Section */}
           <div className="flex items-center gap-3">
-            {user && profile ? (
-              <Link
-                href="/profile"
-                className="px-4 py-2 text-sm font-medium text-white hover:bg-zinc-800/50 rounded-lg transition-colors"
-              >
-                {profile.full_name || profile.username}
-              </Link>
+            {user ? (
+              <UserBadge
+                userId={user.id}
+                fullName={profile?.full_name}
+                username={profile?.username || user.email?.split('@')[0] || 'User'}
+                variant="dark"
+              />
             ) : (
               <Link 
                 href="/auth/login" 
@@ -98,10 +99,10 @@ export default async function DarkNavBar() {
             href="/explore?view=neighborhood"
             className="block px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-lg"
           >
-            Neighborhoods
+            Areas
           </Link>
           <Link
-            href="/explore?view=best-of"
+            href="/best-of"
             className="block px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-lg"
           >
             Best Of

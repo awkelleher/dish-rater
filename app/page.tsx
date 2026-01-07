@@ -41,14 +41,14 @@ export default function LandingPage() {
           {/* Quick Action Cards */}
           <div className="grid md:grid-cols-2 gap-4 mb-12">
             {/* Top 10 Quick Hit */}
-            <Link 
-              href="/explore?view=best-of&limit=10"
+            <Link
+              href="/best-of"
               className="group relative overflow-hidden bg-gradient-to-br from-orange-600 to-red-700 rounded-2xl p-8 hover:scale-[1.02] transition-transform"
             >
               <div className="relative z-10">
                 <div className="text-4xl mb-3">⚡</div>
-                <h3 className="text-2xl font-bold mb-2">Top 10 in JC</h3>
-                <p className="text-orange-100">Highest rated dishes right now</p>
+                <h3 className="text-2xl font-bold mb-2">Best Of JC</h3>
+                <p className="text-orange-100">Top dishes by area or food type</p>
               </div>
               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
             </Link>
@@ -80,7 +80,7 @@ export default function LandingPage() {
                 </Link>
               ))}
               <Link
-                href="/explore?view=best-of"
+                href="/best-of"
                 className="px-5 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-semibold transition-colors border border-zinc-700 hover:border-yellow-500"
               >
                 ⭐ Best Of
@@ -138,11 +138,11 @@ export default function LandingPage() {
         <div className="max-w-4xl mx-auto text-center py-20 border-t border-zinc-800">
           <h2 className="text-4xl font-bold mb-4">Hungry right now?</h2>
           <p className="text-zinc-400 mb-8">Stop scrolling. Start eating.</p>
-          <Link 
-            href="/explore?view=best-of&limit=10"
+          <Link
+            href="/best-of"
             className="inline-block bg-gradient-to-r from-orange-600 to-red-600 text-white px-8 py-4 rounded-xl text-lg font-bold hover:from-orange-700 hover:to-red-700 transition-all"
           >
-            Show Me Top 10
+            Explore Best Of
           </Link>
         </div>
       </main>

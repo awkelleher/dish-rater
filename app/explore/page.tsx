@@ -2,22 +2,12 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import DarkNavBar from '../components/DarkNavBar'
 
-const DISH_TYPES = [
-  { name: 'Tacos', emoji: '🌮', category: 'Taco' },
-  { name: 'Pizza', emoji: '🍕', category: 'Pizza' },
-  { name: 'Ramen', emoji: '🍜', category: 'Ramen' },
-  { name: 'Burgers', emoji: '🍔', category: 'Burger' },
-  { name: 'Sandwiches', emoji: '🥪', category: 'Sandwich' },
-  { name: 'Sushi', emoji: '🍣', category: 'Sushi' },
-]
-
 export default async function ExplorePage({
   searchParams,
 }: {
   searchParams: Promise<{
     view?: string
     neighborhood?: string
-    category?: string
     limit?: string
   }>
 }) {
@@ -25,83 +15,90 @@ export default async function ExplorePage({
   const params = await searchParams
   const view = params.view || 'all'
   const selectedNeighborhood = params.neighborhood
-  const selectedCategory = params.category || 'Taco'
   const limit = params.limit ? parseInt(params.limit) : 50
 
   // Fetch dishes based on view
   let dishes: any[] = []
-  let query = supabase
-    .from('dishes')
-    .select(`
-      *,
-      restaurants!inner (
-        id,
-        name,
-        neighborhood,
-        city
-      )
-    `)
-    .eq('restaurants.city', 'Jersey City')
-
-  // Apply category filter if specified
-  if (selectedCategory && selectedCategory !== 'all') {
-    query = query.eq('category', selectedCategory)
-  }
 
   if (view === 'neighborhood' && selectedNeighborhood) {
-    // Filter by specific neighborhood
-    const { data } = await query
-      .eq('restaurants.neighborhood', selectedNeighborhood)
-      .order('rating_count', { ascending: false })
-      .order('average_rating', { ascending: false })
+    // Filter by specific area
+    const { data, error } = await supabase
+      .from('dishes')
+      .select(`
+        *,
+        restaurants!inner (
+          id,
+          name,
+          area,
+          city
+        )
+      `)
+      .eq('restaurants.city', 'Jersey City')
+      .eq('restaurants.area', selectedNeighborhood)
+      .order('created_at', { ascending: false })
       .limit(50)
+
+    if (error) {
+      console.error('Error fetching dishes by area:', error)
+    }
+    console.log('Filtering by area:', selectedNeighborhood)
+    console.log('Found dishes:', data?.length || 0)
+
     dishes = data || []
   } else if (view === 'best-of') {
-    // Show best rated dishes (8+ rating)
-    const { data } = await query
-      .gte('average_rating', 8)
-      .gte('rating_count', 1)
-      .order('average_rating', { ascending: false })
-      .order('rating_count', { ascending: false })
-      .limit(50)
-    dishes = data || []
-  } else if (view === 'category') {
-    // Show all dishes of selected category
-    const { data } = await query
-      .order('rating_count', { ascending: false })
-      .order('average_rating', { ascending: false })
+    // Show all rated dishes (will need to join with ratings table in the future)
+    const { data } = await supabase
+      .from('dishes')
+      .select(`
+        *,
+        restaurants!inner (
+          id,
+          name,
+          area,
+          city
+        )
+      `)
+      .eq('restaurants.city', 'Jersey City')
       .order('created_at', { ascending: false })
       .limit(50)
     dishes = data || []
   } else {
     // Show all dishes
-    const { data } = await query
-      .order('rating_count', { ascending: false })
-      .order('average_rating', { ascending: false })
+    const { data } = await supabase
+      .from('dishes')
+      .select(`
+        *,
+        restaurants!inner (
+          id,
+          name,
+          area,
+          city
+        )
+      `)
+      .eq('restaurants.city', 'Jersey City')
       .order('created_at', { ascending: false })
       .limit(50)
     dishes = data || []
   }
 
-  // Get unique neighborhoods for the neighborhood browser
-  const { data: neighborhoods } = await supabase
+  // Get unique areas for the area browser
+  const { data: restaurants } = await supabase
     .from('restaurants')
-    .select('neighborhood')
+    .select('area')
     .eq('city', 'Jersey City')
-    .not('neighborhood', 'is', null)
-    .order('neighborhood')
+    .not('area', 'is', null)
 
-  const uniqueNeighborhoods = [...new Set(neighborhoods?.map(r => r.neighborhood) || [])]
+  const uniqueAreas = [...new Set(restaurants?.map(r => r.area) || [])]
 
-  // Group neighborhoods by area
-  const neighborhoodsByArea = {
-    'Bergen-Lafayette': ['Beacon', 'Bergen Hill', 'Communipaw', 'The Junction', 'Jackson Hill'],
-    'The Heights': ['Central Avenue', 'Chelsea', 'Sparrow Hill', 'Transfer Station', 'Washington Village', 'Western Slope'],
-    'Historic Downtown': ['Grove Street', 'Hamilton Park', 'Harsimus', 'Boyle Plaza', 'Van Vorst Park', 'The Village', 'West End', 'Hudson Waterfront', 'Exchange Place', 'Harborside Financial Center', 'Newport', 'Paulus Hook', 'Powerhouse Arts District'],
-    'Greenville': ['Curries Woods', 'Port Liberte', 'Country Village', 'Claremont'],
-    'Journal Square': ['Bergen Square', 'Five Corners', 'The Hilltop', 'India Square', 'The Island', 'Marion', 'McGinley Square'],
-    'West Side': ['Hackensack Riverfront', 'Croxton', "Droyer's Point", 'Lincoln Park', 'Riverbend', 'Society Hill']
-  }
+  // All areas from the form
+  const allAreas = [
+    'Downtown',
+    'Journal Square',
+    'Heights',
+    'West Side',
+    'Bergen-Lafayette',
+    'Greenville'
+  ]
 
   return (
     <div className="min-h-screen bg-zinc-900 text-white">
@@ -114,24 +111,7 @@ export default async function ExplorePage({
           <>
             <div className="mb-8">
               <h1 className="text-4xl font-bold mb-2">🍽️ Explore</h1>
-              <p className="text-gray-600">Discover the best food in Jersey City</p>
-            </div>
-
-            {/* Dish Type Categories */}
-            <div className="mb-12">
-              <h2 className="text-2xl font-bold mb-6">Browse by Dish Type</h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {DISH_TYPES.map((type) => (
-                  <Link
-                    key={type.category}
-                    href={`/explore?view=category&category=${type.category}`}
-                    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all p-6 text-center group border-2 border-transparent hover:border-orange-200"
-                  >
-                    <div className="text-5xl mb-2 group-hover:scale-110 transition-transform">{type.emoji}</div>
-                    <h3 className="font-bold text-gray-900">{type.name}</h3>
-                  </Link>
-                ))}
-              </div>
+              <p className="text-zinc-400">Discover the best food in Jersey City</p>
             </div>
 
             {/* Explore Options */}
@@ -141,7 +121,7 @@ export default async function ExplorePage({
                 className="bg-gradient-to-br from-orange-500 to-red-500 rounded-xl shadow-lg hover:shadow-xl transition-all p-8 text-white"
               >
                 <div className="text-5xl mb-4">📍</div>
-                <h3 className="text-2xl font-bold mb-2">By Neighborhood</h3>
+                <h3 className="text-2xl font-bold mb-2">By Area</h3>
                 <p className="text-orange-100">Explore the best dishes in your area</p>
               </Link>
 
@@ -150,120 +130,56 @@ export default async function ExplorePage({
                 className="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl shadow-lg hover:shadow-xl transition-all p-8 text-white"
               >
                 <div className="text-5xl mb-4">⭐</div>
-                <h3 className="text-2xl font-bold mb-2">Best Of</h3>
-                <p className="text-yellow-100">Top rated dishes across Jersey City (8+ rating)</p>
+                <h3 className="text-2xl font-bold mb-2">Recent Dishes</h3>
+                <p className="text-yellow-100">See the latest dishes added to Jersey City</p>
               </Link>
             </div>
           </>
         )}
 
-        {/* Category View */}
-        {view === 'category' && (
-          <>
-            <div className="mb-8">
-              <Link href="/explore" className="text-sm text-gray-600 hover:text-black mb-2 inline-block">
-                ← Back to Explore
-              </Link>
-              <h1 className="text-4xl font-bold mb-4">
-                {DISH_TYPES.find(t => t.category === selectedCategory)?.emoji}{' '}
-                {DISH_TYPES.find(t => t.category === selectedCategory)?.name || selectedCategory}
-              </h1>
-              
-              {/* Filter by Neighborhood */}
-              <div className="flex gap-2 flex-wrap">
-                <Link
-                  href={`/explore?view=category&category=${selectedCategory}`}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    !selectedNeighborhood
-                      ? 'bg-black text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  All Neighborhoods
-                </Link>
-                <Link
-                  href={`/explore?view=best-of&category=${selectedCategory}`}
-                  className="px-4 py-2 rounded-lg font-medium bg-yellow-100 text-yellow-800 hover:bg-yellow-200 transition-colors"
-                >
-                  ⭐ Best Of (8+)
-                </Link>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Neighborhood Browser */}
+        {/* Area Browser */}
         {view === 'neighborhood' && !selectedNeighborhood && (
           <>
             <div className="mb-8">
-              <Link href="/explore" className="text-sm text-gray-600 hover:text-black mb-2 inline-block">
+              <Link href="/explore" className="text-sm text-zinc-400 hover:text-white mb-2 inline-block">
                 ← Back to Explore
               </Link>
-              <h1 className="text-4xl font-bold mb-2">📍 Browse by Neighborhood</h1>
-              <p className="text-gray-600">Select a neighborhood to see the best dishes in that area</p>
+              <h1 className="text-4xl font-bold mb-2">📍 Browse by Area</h1>
+              <p className="text-zinc-400">Select an area to see the best dishes in that part of Jersey City</p>
             </div>
 
-            <div className="space-y-8">
-              {Object.entries(neighborhoodsByArea).map(([area, hoods]) => {
-                const hoodsWithDishes = hoods.filter(h => uniqueNeighborhoods.includes(h))
-                if (hoodsWithDishes.length === 0) return null
-                
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {allAreas.map((area) => {
+                const hasDishes = uniqueAreas.includes(area)
                 return (
-                  <div key={area}>
-                    <h2 className="text-2xl font-bold mb-4">{area}</h2>
-                    <div className="grid md:grid-cols-3 lg:grid-cols-4 gap-4">
-                      {hoodsWithDishes.map((hood) => (
-                        <Link
-                          key={hood}
-                          href={`/explore?view=neighborhood&neighborhood=${encodeURIComponent(hood)}`}
-                          className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-4 text-center hover:border-2 hover:border-orange-200"
-                        >
-                          <div className="font-semibold text-gray-900">{hood}</div>
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
+                  <Link
+                    key={area}
+                    href={`/explore?view=neighborhood&neighborhood=${encodeURIComponent(area)}`}
+                    className={`rounded-lg shadow-sm hover:shadow-md transition-all p-8 text-center border-2 ${
+                      hasDishes
+                        ? 'bg-white hover:border-orange-400 text-gray-900'
+                        : 'bg-zinc-800 border-zinc-700 hover:border-zinc-600 text-zinc-400'
+                    }`}
+                  >
+                    <div className="text-2xl font-bold mb-2">{area}</div>
+                    {!hasDishes && (
+                      <div className="text-sm text-zinc-500">No dishes yet</div>
+                    )}
+                  </Link>
                 )
               })}
             </div>
           </>
         )}
 
-        {/* Neighborhood Results */}
+        {/* Area Results */}
         {view === 'neighborhood' && selectedNeighborhood && (
           <>
             <div className="mb-8">
-              <Link href="/explore?view=neighborhood" className="text-sm text-gray-600 hover:text-black mb-2 inline-block">
-                ← All Neighborhoods
+              <Link href="/explore?view=neighborhood" className="text-sm text-zinc-400 hover:text-white mb-2 inline-block">
+                ← All Areas
               </Link>
               <h1 className="text-4xl font-bold mb-4">📍 {selectedNeighborhood}</h1>
-              
-              {/* Filter by Category */}
-              <div className="flex gap-2 flex-wrap">
-                <Link
-                  href={`/explore?view=neighborhood&neighborhood=${selectedNeighborhood}`}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    !selectedCategory || selectedCategory === 'all'
-                      ? 'bg-black text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  All Dishes
-                </Link>
-                {DISH_TYPES.map((type) => (
-                  <Link
-                    key={type.category}
-                    href={`/explore?view=neighborhood&neighborhood=${selectedNeighborhood}&category=${type.category}`}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      selectedCategory === type.category
-                        ? 'bg-black text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    {type.emoji} {type.name}
-                  </Link>
-                ))}
-              </div>
             </div>
           </>
         )}
@@ -272,37 +188,10 @@ export default async function ExplorePage({
         {view === 'best-of' && (
           <>
             <div className="mb-8">
-              <Link href="/explore" className="text-sm text-gray-600 hover:text-black mb-2 inline-block">
+              <Link href="/explore" className="text-sm text-zinc-400 hover:text-white mb-2 inline-block">
                 ← Back to Explore
               </Link>
-              <h1 className="text-4xl font-bold mb-4">⭐ Best Of Jersey City</h1>
-              
-              {/* Filter by Category */}
-              <div className="flex gap-2 flex-wrap">
-                <Link
-                  href="/explore?view=best-of"
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    !selectedCategory || selectedCategory === 'all'
-                      ? 'bg-black text-white'
-                      : 'bg-white text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  All Dishes
-                </Link>
-                {DISH_TYPES.map((type) => (
-                  <Link
-                    key={type.category}
-                    href={`/explore?view=best-of&category=${type.category}`}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      selectedCategory === type.category
-                        ? 'bg-black text-white'
-                        : 'bg-white text-gray-700 hover:bg-gray-100'
-                    }`}
-                  >
-                    {type.emoji} {type.name}
-                  </Link>
-                ))}
-              </div>
+              <h1 className="text-4xl font-bold mb-4">⭐ Recent Dishes</h1>
             </div>
           </>
         )}
@@ -317,46 +206,23 @@ export default async function ExplorePage({
                   href={`/dishes/${dish.id}`}
                   className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow p-6"
                 >
-                  <div className="flex justify-between items-start mb-2">
-                    <h3 className="font-semibold text-lg">{dish.name}</h3>
-                    {dish.rating_count > 0 ? (
-                      <div className="flex items-center gap-1 bg-yellow-100 px-2 py-1 rounded">
-                        <span className="text-yellow-600">⭐</span>
-                        <span className="font-semibold">{dish.average_rating.toFixed(1)}</span>
-                      </div>
-                    ) : (
-                      <div className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
-                        NEW
-                      </div>
-                    )}
-                  </div>
-                  
+                  <h3 className="font-semibold text-lg text-gray-900 mb-2">{dish.name}</h3>
+
                   <p className="text-sm text-gray-600 mb-3">{dish.restaurants.name}</p>
-                  
+
                   {dish.description && (
                     <p className="text-sm text-gray-500 line-clamp-2 mb-3">
                       {dish.description}
                     </p>
                   )}
-                  
-                  <div className="flex gap-2 text-xs text-gray-500 flex-wrap">
-                    <span className="bg-gray-100 px-2 py-1 rounded">{dish.category}</span>
-                    {dish.restaurants.neighborhood && (
+
+                  {dish.restaurants.area && (
+                    <div className="flex gap-2 text-xs text-gray-500">
                       <span className="bg-gray-100 px-2 py-1 rounded">
-                        {dish.restaurants.neighborhood}
+                        {dish.restaurants.area}
                       </span>
-                    )}
-                    {dish.price && (
-                      <span className="bg-green-100 text-green-700 px-2 py-1 rounded font-medium">
-                        ${dish.price.toFixed(2)}
-                      </span>
-                    )}
-                    {dish.rating_count > 0 && (
-                      <span className="bg-gray-100 px-2 py-1 rounded">
-                        {dish.rating_count} {dish.rating_count === 1 ? 'rating' : 'ratings'}
-                      </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </Link>
               ))
             ) : (
