@@ -14,18 +14,19 @@ const DISH_TYPES = [
 export default async function ExplorePage({
   searchParams,
 }: {
-  searchParams: { 
+  searchParams: Promise<{
     view?: string
     neighborhood?: string
     category?: string
     limit?: string
-  }
+  }>
 }) {
   const supabase = await createClient()
-  const view = searchParams.view || 'all'
-  const selectedNeighborhood = searchParams.neighborhood
-  const selectedCategory = searchParams.category || 'Taco'
-  const limit = searchParams.limit ? parseInt(searchParams.limit) : 50
+  const params = await searchParams
+  const view = params.view || 'all'
+  const selectedNeighborhood = params.neighborhood
+  const selectedCategory = params.category || 'Taco'
+  const limit = params.limit ? parseInt(params.limit) : 50
 
   // Fetch dishes based on view
   let dishes: any[] = []

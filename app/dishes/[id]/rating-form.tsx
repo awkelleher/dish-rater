@@ -88,8 +88,6 @@ export default function RatingForm({ dishId, restaurantId }: RatingFormProps) {
         would_order_again: formData.would_order_again,
       }
 
-      let ratingId = existingRating?.id
-
       if (existingRating) {
         // Update existing rating
         const { error: updateError } = await supabase
@@ -100,21 +98,17 @@ export default function RatingForm({ dishId, restaurantId }: RatingFormProps) {
         if (updateError) throw updateError
       } else {
         // Insert new rating
-        const { data: newRating, error: insertError } = await supabase
+        const { error: insertError } = await supabase
           .from('ratings')
           .insert(ratingData)
-          .select()
-          .single()
 
         if (insertError) throw insertError
-        ratingId = newRating.id
       }
 
       // Save photos if any were uploaded
-      if (photos.length > 0 && ratingId) {
+      if (photos.length > 0) {
         const photoInserts = photos.map(photo => ({
           dish_id: dishId,
-          rating_id: ratingId,
           user_id: user.id,
           storage_path: photo.path,
           url: photo.url,
