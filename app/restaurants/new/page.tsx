@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import ClientHeader from '@/app/components/ClientHeader'
+import ClientDarkNavBar from '@/app/components/ClientDarkNavBar'
 import PhotoUpload from '@/app/components/PhotoUpload'
 import RestaurantAutocomplete from '@/app/components/RestaurantAutocomplete'
 import RatingSlider from '@/app/components/RatingSlider'
@@ -115,9 +115,13 @@ export default function NewDishPage() {
             restaurant_id: restaurant.id,
             user_id: user.id,
             rating: formData.rating,
+            review_text: null,
+            would_order_again: null,
           })
 
-        if (ratingError) console.error('Error saving rating:', ratingError)
+        if (ratingError) {
+          console.error('Error saving rating:', ratingError)
+        }
       }
 
       // Save photos if any were uploaded
@@ -147,14 +151,14 @@ export default function NewDishPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <ClientHeader />
+    <div className="min-h-screen bg-zinc-900 text-white">
+      <ClientDarkNavBar />
 
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-2xl">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2">Add a Dish</h1>
-          <p className="text-gray-600">Add a dish from Jersey City</p>
+          <p className="text-gray-400">Add a dish from Jersey City</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6 space-y-6">
