@@ -31,7 +31,7 @@ export default function LoginPage() {
 
       if (error) throw error
 
-      router.push('/explore')
+      router.push('/')
     } catch (err) {
       console.error('Error logging in:', err)
       setError(err instanceof Error ? err.message : 'Failed to log in')

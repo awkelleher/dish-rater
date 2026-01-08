@@ -1,18 +1,34 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
+import DarkNavBar from '@/app/components/DarkNavBar';
 
 export default async function BestOfPage() {
   const supabase = await createClient();
 
-  // Get all unique areas
-  const { data: areas } = await supabase
+  // Get all unique neighborhoods from database to check which have dishes
+  const { data: neighborhoods } = await supabase
     .from('restaurants')
-    .select('area')
+    .select('neighborhood')
     .eq('city', 'Jersey City')
-    .not('area', 'is', null)
-    .order('area');
+    .not('neighborhood', 'is', null)
+    .order('neighborhood');
 
-  const uniqueAreas = [...new Set(areas?.map(r => r.area) || [])];
+  const neighborhoodsWithDishes = [...new Set(neighborhoods?.map(r => r.neighborhood) || [])];
+
+  // All neighborhoods (same as in the dish form) - sorted alphabetically
+  const allNeighborhoods = [
+    'BERGEN-LAFAYETTE',
+    'Downtown',
+    'Exchange Place',
+    'GREENVILLE',
+    'Grove Street',
+    'JOURNAL SQUARE',
+    'Newport',
+    'Paulus Hook',
+    'THE HEIGHTS',
+    'Van Vorst Park',
+    'WEST SIDE'
+  ];
 
   // Get all unique dish categories with counts
   const { data: categories } = await supabase
@@ -33,7 +49,8 @@ export default async function BestOfPage() {
     .map(([category]) => category);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12">
+    <div className="min-h-screen bg-black pb-12">
+      <DarkNavBar />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Header */}
         <div className="mb-12 text-center">
@@ -45,27 +62,38 @@ export default async function BestOfPage() {
           </p>
         </div>
 
-        {/* Browse by Area Section */}
+        {/* Browse by Neighborhood Section */}
         <section className="mb-16">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
             <span className="mr-3">📍</span>
-            Browse by Area
+            Browse by Neighborhood
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {uniqueAreas.map((area) => (
-              <Link
-                key={area}
-                href={`/best-of/area/${encodeURIComponent(area)}`}
-                className="group bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all p-6 text-center border border-gray-200 dark:border-gray-700 hover:border-orange-400 dark:hover:border-orange-500"
-              >
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors">
-                  {area}
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                  Top 10 dishes
-                </p>
-              </Link>
-            ))}
+            {allNeighborhoods.map((neighborhood) => {
+              const hasDishes = neighborhoodsWithDishes.includes(neighborhood);
+              return (
+                <Link
+                  key={neighborhood}
+                  href={`/best-of/area/${encodeURIComponent(neighborhood)}`}
+                  className={`group rounded-lg shadow hover:shadow-lg transition-all p-6 text-center border ${
+                    hasDishes
+                      ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-orange-400 dark:hover:border-orange-500'
+                      : 'bg-gray-100 dark:bg-gray-900 border-gray-300 dark:border-gray-800 opacity-60'
+                  }`}
+                >
+                  <h3 className={`text-lg font-semibold transition-colors ${
+                    hasDishes
+                      ? 'text-gray-900 dark:text-white group-hover:text-orange-500 dark:group-hover:text-orange-400'
+                      : 'text-gray-500 dark:text-gray-600'
+                  }`}>
+                    {neighborhood}
+                  </h3>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    {hasDishes ? 'Top 10 dishes' : 'No dishes yet'}
+                  </p>
+                </Link>
+              );
+            })}
           </div>
         </section>
 

@@ -82,7 +82,7 @@ export default function NewDishPage() {
               address: '', // No longer collecting
               city: 'Jersey City',
               state: 'NJ',
-              area: formData.area,
+              neighborhood: formData.area,
               created_by: user?.id || null,
             })
             .select()
@@ -140,8 +140,8 @@ export default function NewDishPage() {
         if (photoError) console.error('Error saving photos:', photoError)
       }
 
-      // Redirect to explore
-      router.push('/explore')
+      // Redirect to home page
+      router.push('/')
     } catch (err) {
       console.error('Error creating dish:', err)
       setError(err instanceof Error ? err.message : 'Failed to create dish')
@@ -175,11 +175,13 @@ export default function NewDishPage() {
             <RestaurantAutocomplete
               value={formData.restaurantName}
               onChange={(name, id) => {
-                setFormData({ ...formData, restaurantName: name })
+                console.log('onChange called with name:', name, 'id:', id)
+                setFormData(prev => ({ ...prev, restaurantName: name }))
                 setSelectedRestaurantId(id || null)
               }}
-              onAreaSelect={(area) => {
-                setFormData({ ...formData, area })
+              onNeighborhoodSelect={(neighborhood) => {
+                console.log('onNeighborhoodSelect called with:', neighborhood)
+                setFormData(prev => ({ ...prev, area: neighborhood }))
               }}
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -189,7 +191,7 @@ export default function NewDishPage() {
 
           <div>
             <label htmlFor="area" className="block text-sm font-medium text-gray-700 mb-2">
-              Area *
+              Neighborhood *
             </label>
             <select
               id="area"
@@ -198,13 +200,18 @@ export default function NewDishPage() {
               onChange={(e) => setFormData({ ...formData, area: e.target.value })}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
             >
-              <option value="">Select an area</option>
+              <option value="">Select a neighborhood</option>
+              <option value="BERGEN-LAFAYETTE">BERGEN-LAFAYETTE</option>
               <option value="Downtown">Downtown</option>
-              <option value="Journal Square">Journal Square</option>
-              <option value="Heights">Heights</option>
-              <option value="West Side">West Side</option>
-              <option value="Bergen-Lafayette">Bergen-Lafayette</option>
-              <option value="Greenville">Greenville</option>
+              <option value="Exchange Place">Exchange Place</option>
+              <option value="GREENVILLE">GREENVILLE</option>
+              <option value="Grove Street">Grove Street</option>
+              <option value="JOURNAL SQUARE">JOURNAL SQUARE</option>
+              <option value="Newport">Newport</option>
+              <option value="Paulus Hook">Paulus Hook</option>
+              <option value="THE HEIGHTS">THE HEIGHTS</option>
+              <option value="Van Vorst Park">Van Vorst Park</option>
+              <option value="WEST SIDE">WEST SIDE</option>
             </select>
           </div>
 
