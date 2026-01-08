@@ -8,7 +8,7 @@ export default async function DarkNavBar() {
 
   // Check if user is logged in
   const { data: { user } } = await supabase.auth.getUser()
-  
+
   // Get user profile if logged in
   let profile = null
   if (user) {
@@ -19,6 +19,34 @@ export default async function DarkNavBar() {
       .single()
     profile = data
   }
+
+  // Get all unique neighborhoods
+  const { data: neighborhoods } = await supabase
+    .from('restaurants')
+    .select('neighborhood')
+    .eq('city', 'Jersey City')
+    .not('neighborhood', 'is', null)
+    .order('neighborhood')
+
+  const uniqueNeighborhoods = [...new Set(neighborhoods?.map(r => r.neighborhood) || [])]
+
+  // Get all unique dish categories with counts
+  const { data: categories } = await supabase
+    .from('dishes')
+    .select('category')
+    .not('category', 'is', null)
+
+  const categoryCounts = categories?.reduce((acc, dish) => {
+    if (dish.category) {
+      acc[dish.category] = (acc[dish.category] || 0) + 1
+    }
+    return acc
+  }, {} as Record<string, number>) || {}
+
+  const popularCategories = Object.entries(categoryCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 12)
+    .map(([category]) => category)
 
   return (
     <nav className="sticky top-0 z-50 bg-black border-b border-zinc-800 backdrop-blur-sm bg-black/95">
@@ -37,19 +65,72 @@ export default async function DarkNavBar() {
 
           {/* Main Nav Links */}
           <div className="hidden md:flex items-center gap-1">
-            <Link
-              href="/explore?view=neighborhood"
-              className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-lg transition-colors"
-            >
-              Areas
-            </Link>
-            
-            <Link
-              href="/best-of"
-              className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-lg transition-colors"
-            >
-              Best Of
-            </Link>
+            {/* Best Of Dropdown with Sub-menus */}
+            <div className="relative group">
+              <Link
+                href="/best-of"
+                className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white hover:bg-zinc-800/50 rounded-lg transition-colors flex items-center gap-1"
+              >
+                Best Of
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </Link>
+              <div className="absolute left-0 mt-1 w-56 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                <div className="py-2">
+                  {/* Neighborhoods Sub-dropdown */}
+                  <div className="relative group/neighborhoods">
+                    <div className="px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50 transition-colors font-medium flex items-center justify-between cursor-pointer">
+                      Neighborhoods
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                    <div className="absolute left-full top-0 ml-1 w-56 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl opacity-0 invisible group-hover/neighborhoods:opacity-100 group-hover/neighborhoods:visible transition-all duration-200">
+                      <div className="py-2">
+                        {uniqueNeighborhoods.map((neighborhood) => (
+                          <Link
+                            key={neighborhood}
+                            href={`/best-of/area/${encodeURIComponent(neighborhood)}`}
+                            className="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
+                          >
+                            {neighborhood}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Food Categories Sub-dropdown */}
+                  <div className="relative group/food">
+                    <div className="px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50 transition-colors font-medium flex items-center justify-between cursor-pointer">
+                      Food Categories
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                    <div className="absolute left-full top-0 ml-1 w-56 bg-zinc-900 border border-zinc-800 rounded-lg shadow-xl opacity-0 invisible group-hover/food:opacity-100 group-hover/food:visible transition-all duration-200">
+                      <div className="py-2">
+                        {popularCategories.map((category) => (
+                          <Link
+                            key={category}
+                            href={`/best-of/food/${encodeURIComponent(category)}`}
+                            className="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-zinc-800/50 transition-colors"
+                          >
+                            {category}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-zinc-800 my-2"></div>
+                  <Link href="/best-of" className="block px-4 py-2 text-sm text-zinc-300 hover:text-white hover:bg-zinc-800/50 transition-colors font-medium">
+                    View All
+                  </Link>
+                </div>
+              </div>
+            </div>
 
             <Link
               href="/hot-sauces"

@@ -7,14 +7,12 @@ interface RestaurantAutocompleteProps {
   value: string
   onChange: (value: string, restaurantId?: string) => void
   onNeighborhoodSelect?: (neighborhood: string) => void
-  onAreaSelect?: (area: string) => void
 }
 
 export default function RestaurantAutocomplete({
   value,
   onChange,
-  onNeighborhoodSelect,
-  onAreaSelect
+  onNeighborhoodSelect
 }: RestaurantAutocompleteProps) {
   const supabase = createClient()
   const [suggestions, setSuggestions] = useState<any[]>([])
@@ -36,22 +34,49 @@ export default function RestaurantAutocomplete({
   // Search for restaurants as user types
   useEffect(() => {
     async function searchRestaurants() {
-      if (value.length < 2) {
-        setSuggestions([])
-        return
-      }
-
       setLoading(true)
-      const { data } = await supabase
-        .from('restaurants')
-        .select('id, name, neighborhood, area')
-        .eq('city', 'Jersey City')
-        .ilike('name', `%${value}%`)
-        .limit(5)
 
-      setSuggestions(data || [])
-      setShowSuggestions(true)
-      setLoading(false)
+      try {
+        // If no value or short value, show all restaurants
+        if (value.length < 1) {
+          const { data, error } = await supabase
+            .from('restaurants')
+            .select('id, name, neighborhood')
+            .eq('city', 'Jersey City')
+            .order('name')
+            .limit(10)
+
+          if (error) {
+            console.error('Error fetching restaurants:', error)
+          }
+
+          console.log('All restaurants:', data)
+          setSuggestions(data || [])
+          setLoading(false)
+          return
+        }
+
+        // Otherwise, search by name
+        console.log('Searching for:', value)
+        const { data, error } = await supabase
+          .from('restaurants')
+          .select('id, name, neighborhood')
+          .eq('city', 'Jersey City')
+          .ilike('name', `%${value}%`)
+          .order('name')
+          .limit(10)
+
+        if (error) {
+          console.error('Error searching restaurants:', error)
+        }
+
+        console.log('Search results:', data)
+        setSuggestions(data || [])
+        setLoading(false)
+      } catch (err) {
+        console.error('Exception in searchRestaurants:', err)
+        setLoading(false)
+      }
     }
 
     const timeoutId = setTimeout(searchRestaurants, 300)
@@ -59,15 +84,14 @@ export default function RestaurantAutocomplete({
   }, [value, supabase])
 
   const handleSelect = (restaurant: any) => {
+    console.log('Selected restaurant:', restaurant)
     onChange(restaurant.name, restaurant.id)
+    // Auto-fill neighborhood when restaurant is selected
     if (onNeighborhoodSelect && restaurant.neighborhood) {
+      console.log('Auto-filling neighborhood:', restaurant.neighborhood)
       onNeighborhoodSelect(restaurant.neighborhood)
     }
-    if (onAreaSelect && restaurant.area) {
-      onAreaSelect(restaurant.area)
-    }
     setShowSuggestions(false)
-    setSuggestions([])
   }
 
   return (
@@ -77,7 +101,7 @@ export default function RestaurantAutocomplete({
         required
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+        onFocus={() => setShowSuggestions(true)}
         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
         placeholder="Taqueria Downtown"
         autoComplete="off"
@@ -94,8 +118,8 @@ export default function RestaurantAutocomplete({
               className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b last:border-b-0"
             >
               <div className="font-medium text-gray-900">{restaurant.name}</div>
-              {restaurant.area && (
-                <div className="text-sm text-gray-500">{restaurant.area}</div>
+              {restaurant.neighborhood && (
+                <div className="text-sm text-gray-500">{restaurant.neighborhood}</div>
               )}
             </button>
           ))}

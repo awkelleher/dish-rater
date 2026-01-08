@@ -46,7 +46,7 @@ export default function SignupPage() {
         return
       }
 
-      router.push('/explore')
+      router.push('/')
       router.refresh()
     }
   }

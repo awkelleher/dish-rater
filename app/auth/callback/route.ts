@@ -10,6 +10,6 @@ export async function GET(request: Request) {
     await supabase.auth.exchangeCodeForSession(code)
   }
 
-  // Redirect to explore page after successful login
-  return NextResponse.redirect(new URL('/explore', requestUrl.origin))
+  // Redirect to home page after successful login
+  return NextResponse.redirect(new URL('/', requestUrl.origin))
 }
