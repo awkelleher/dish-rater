@@ -28,7 +28,7 @@ export default async function DarkNavBar() {
     .not('neighborhood', 'is', null)
     .order('neighborhood')
 
-  const uniqueNeighborhoods = [...new Set(neighborhoods?.map(r => r.neighborhood) || [])]
+  const uniqueNeighborhoods = [...new Set(neighborhoods?.map(r => r.neighborhood) || [])].sort()
 
   // Get all unique dish categories with counts
   const { data: categories } = await supabase

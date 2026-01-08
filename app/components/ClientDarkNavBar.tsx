@@ -35,7 +35,7 @@ export default function ClientDarkNavBar() {
         .not('neighborhood', 'is', null)
         .order('neighborhood')
 
-      const uniqueNeighborhoodsData = [...new Set(neighborhoods?.map(r => r.neighborhood) || [])]
+      const uniqueNeighborhoodsData = [...new Set(neighborhoods?.map(r => r.neighborhood) || [])].sort()
       setUniqueNeighborhoods(uniqueNeighborhoodsData)
 
       // Get all unique dish categories with counts
