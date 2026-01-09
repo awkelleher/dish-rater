@@ -6,9 +6,9 @@ import ThemedNavBar from '@/app/components/ThemedNavBar'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 
-export default async function DishPage({ params }: { params: { id: string } }) {
+export default async function DishPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient()
-  const dishId = params.id
+  const { id: dishId } = await params
 
   // Fetch dish with restaurant info
   const { data: dish } = await supabase

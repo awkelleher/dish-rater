@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import TopListsSection from './components/TopListsSection'
 import ThemedNavBar from './components/ThemedNavBar'
+import RestaurantSearch from './components/RestaurantSearch'
 
 export default function Home() {
 
@@ -17,6 +18,12 @@ export default function Home() {
           <Badge className="mb-6 text-base px-4 py-2 bg-secondary text-secondary-foreground border-2 border-foreground">
             Rate · Browse · Discover
           </Badge>
+
+          {/* Search Bar */}
+          <div className="w-full max-w-2xl mx-auto mb-8">
+            <RestaurantSearch variant="hero" />
+          </div>
+
           <h2 className="text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight text-balance">
             Find the Top 10 Best Dishes in Any Jersey City Neighborhood
           </h2>

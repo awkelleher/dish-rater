@@ -229,6 +229,9 @@ export default function TopListsSection() {
   const [neighborhoods, setNeighborhoods] = useState<string[]>([])
   const [selectedNeighborhood, setSelectedNeighborhood] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('Tacos')
+  const [neighborhoodDishes, setNeighborhoodDishes] = useState<any[]>([])
+  const [categoryDishes, setCategoryDishes] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
   // Fetch unique neighborhoods from Supabase
   useEffect(() => {
@@ -250,8 +253,81 @@ export default function TopListsSection() {
     fetchNeighborhoods()
   }, [])
 
-  const neighborhoodDishes = dishDataByNeighborhood[selectedNeighborhood] || []
-  const categoryDishes = dishDataByCategory[selectedCategory] || []
+  // Fetch top dishes for selected neighborhood
+  useEffect(() => {
+    async function fetchNeighborhoodDishes() {
+      if (!selectedNeighborhood) return
+
+      setLoading(true)
+      const { data } = await supabase
+        .from('dishes')
+        .select(`
+          id,
+          name,
+          average_rating,
+          rating_count,
+          restaurants!inner(name, neighborhood)
+        `)
+        .eq('restaurants.neighborhood', selectedNeighborhood)
+        .gte('rating_count', 1)
+        .order('average_rating', { ascending: false })
+        .limit(10)
+
+      if (data) {
+        const formattedData = data.map((dish: any, index: number) => ({
+          rank: index + 1,
+          dish: dish.name,
+          restaurant: dish.restaurants.name,
+          rating: dish.average_rating.toFixed(1),
+        }))
+        setNeighborhoodDishes(formattedData)
+      } else {
+        // Fallback to sample data if no real data
+        setNeighborhoodDishes(dishDataByNeighborhood[selectedNeighborhood] || [])
+      }
+      setLoading(false)
+    }
+    fetchNeighborhoodDishes()
+  }, [selectedNeighborhood])
+
+  // Fetch top dishes for selected category
+  useEffect(() => {
+    async function fetchCategoryDishes() {
+      if (!selectedCategory) return
+
+      setLoading(true)
+      const { data } = await supabase
+        .from('dishes')
+        .select(`
+          id,
+          name,
+          average_rating,
+          rating_count,
+          category,
+          restaurants!inner(name, neighborhood)
+        `)
+        .ilike('category', `%${selectedCategory}%`)
+        .gte('rating_count', 1)
+        .order('average_rating', { ascending: false })
+        .limit(10)
+
+      if (data) {
+        const formattedData = data.map((dish: any, index: number) => ({
+          rank: index + 1,
+          dish: dish.name,
+          restaurant: dish.restaurants.name,
+          neighborhood: dish.restaurants.neighborhood,
+          rating: dish.average_rating.toFixed(1),
+        }))
+        setCategoryDishes(formattedData)
+      } else {
+        // Fallback to sample data if no real data
+        setCategoryDishes(dishDataByCategory[selectedCategory] || [])
+      }
+      setLoading(false)
+    }
+    fetchCategoryDishes()
+  }, [selectedCategory])
 
   return (
     <section className="py-12 md:py-20 px-6">
@@ -280,26 +356,37 @@ export default function TopListsSection() {
               <p className="text-lg text-muted-foreground">The neighborhood's absolute best dishes right now</p>
             </div>
             <Card className="border-4 border-foreground shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-card">
-              <div className="divide-y-2 divide-border">
-                {neighborhoodDishes.map((item) => (
-                  <div key={item.rank} className="p-4 hover:bg-muted transition-colors cursor-pointer">
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="w-12 h-12 bg-primary text-primary-foreground border-2 border-foreground flex items-center justify-center font-bold text-xl">
-                          {item.rank}
+              {loading ? (
+                <div className="p-12 text-center">
+                  <div className="text-muted-foreground font-bold uppercase tracking-wide">Loading dishes...</div>
+                </div>
+              ) : neighborhoodDishes.length === 0 ? (
+                <div className="p-12 text-center">
+                  <div className="text-muted-foreground font-bold uppercase tracking-wide mb-2">No dishes yet!</div>
+                  <p className="text-sm text-muted-foreground">Be the first to rate a dish in {selectedNeighborhood}</p>
+                </div>
+              ) : (
+                <div className="divide-y-2 divide-border">
+                  {neighborhoodDishes.map((item) => (
+                    <div key={item.rank} className="p-4 hover:bg-muted transition-colors cursor-pointer">
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0">
+                          <div className="w-12 h-12 bg-primary text-primary-foreground border-2 border-foreground flex items-center justify-center font-bold text-xl">
+                            {item.rank}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-foreground text-lg leading-tight mb-1">{item.dish}</h4>
+                          <p className="text-muted-foreground text-sm">{item.restaurant}</p>
+                        </div>
+                        <div className="flex-shrink-0 text-right">
+                          <div className="font-bold text-lg text-secondary">{item.rating}</div>
                         </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-foreground text-lg leading-tight mb-1">{item.dish}</h4>
-                        <p className="text-muted-foreground text-sm">{item.restaurant}</p>
-                      </div>
-                      <div className="flex-shrink-0 text-right">
-                        <div className="font-bold text-lg text-secondary">{item.rating}</div>
-                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </Card>
           </div>
 
@@ -324,28 +411,39 @@ export default function TopListsSection() {
               <p className="text-lg text-muted-foreground">The best across all neighborhoods</p>
             </div>
             <Card className="border-4 border-foreground shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-card">
-              <div className="divide-y-2 divide-border">
-                {categoryDishes.map((item) => (
-                  <div key={item.rank} className="p-4 hover:bg-muted transition-colors cursor-pointer">
-                    <div className="flex gap-4">
-                      <div className="flex-shrink-0">
-                        <div className="w-12 h-12 bg-primary text-primary-foreground border-2 border-foreground flex items-center justify-center font-bold text-xl">
-                          {item.rank}
+              {loading ? (
+                <div className="p-12 text-center">
+                  <div className="text-muted-foreground font-bold uppercase tracking-wide">Loading dishes...</div>
+                </div>
+              ) : categoryDishes.length === 0 ? (
+                <div className="p-12 text-center">
+                  <div className="text-muted-foreground font-bold uppercase tracking-wide mb-2">No dishes yet!</div>
+                  <p className="text-sm text-muted-foreground">Be the first to rate a {selectedCategory.toLowerCase()} dish</p>
+                </div>
+              ) : (
+                <div className="divide-y-2 divide-border">
+                  {categoryDishes.map((item) => (
+                    <div key={item.rank} className="p-4 hover:bg-muted transition-colors cursor-pointer">
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0">
+                          <div className="w-12 h-12 bg-primary text-primary-foreground border-2 border-foreground flex items-center justify-center font-bold text-xl">
+                            {item.rank}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-foreground text-lg leading-tight mb-1">{item.dish}</h4>
+                          <p className="text-muted-foreground text-sm">
+                            {item.restaurant} · {item.neighborhood}
+                          </p>
+                        </div>
+                        <div className="flex-shrink-0 text-right">
+                          <div className="font-bold text-lg text-secondary">{item.rating}</div>
                         </div>
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-foreground text-lg leading-tight mb-1">{item.dish}</h4>
-                        <p className="text-muted-foreground text-sm">
-                          {item.restaurant} · {item.neighborhood}
-                        </p>
-                      </div>
-                      <div className="flex-shrink-0 text-right">
-                        <div className="font-bold text-lg text-secondary">{item.rating}</div>
-                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </Card>
           </div>
         </div>
