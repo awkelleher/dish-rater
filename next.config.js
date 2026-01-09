@@ -1,23 +1,22 @@
-const path = require('path')
+const path = require("path");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Force Turbopack to treat this directory as the workspace root. Without this,
-  // Next will pick the parent repo because it also has a lockfile, which breaks
-  // path aliases like "@/components/...".
-  experimental: {
-    turbopack: {
-      root: path.resolve(__dirname),
-    },
+  // Tell Turbopack what the workspace root is (so @/ aliases resolve correctly
+  // in a git worktree where a parent folder also has a lockfile).
+  turbopack: {
+    root: path.resolve(__dirname),
   },
+
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: '**.supabase.co',
+        protocol: "https",
+        hostname: "**.supabase.co",
       },
     ],
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
+
