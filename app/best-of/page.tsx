@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
-import DarkNavBar from '@/app/components/DarkNavBar';
+import ThemedNavBar from '@/app/components/ThemedNavBar';
 
 export default async function BestOfPage() {
   const supabase = await createClient();
@@ -49,46 +49,46 @@ export default async function BestOfPage() {
     .map(([category]) => category);
 
   return (
-    <div className="min-h-screen bg-black pb-12">
-      <DarkNavBar />
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="min-h-screen bg-background">
+      <ThemedNavBar />
+      <div className="container mx-auto px-6 py-8 md:py-12 max-w-7xl">
         {/* Header */}
-        <div className="mb-12 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-3">
+        <div className="mb-12 md:mb-16 text-center border-b-4 border-foreground pb-8">
+          <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-4 uppercase tracking-tight">
             Best Of Jersey City
           </h1>
-          <p className="text-lg text-gray-600 dark:text-gray-400">
+          <p className="text-xl md:text-2xl text-muted-foreground uppercase tracking-wide font-bold">
             Discover the top-rated dishes by neighborhood or food type
           </p>
         </div>
 
         {/* Browse by Neighborhood Section */}
-        <section className="mb-16">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-            <span className="mr-3">📍</span>
+        <section className="mb-16 md:mb-20">
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-8 flex items-center uppercase tracking-tight">
+            <span className="mr-4 text-4xl">📍</span>
             Browse by Neighborhood
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {allNeighborhoods.map((neighborhood) => {
               const hasDishes = neighborhoodsWithDishes.includes(neighborhood);
               return (
                 <Link
                   key={neighborhood}
                   href={`/best-of/area/${encodeURIComponent(neighborhood)}`}
-                  className={`group rounded-lg shadow hover:shadow-lg transition-all p-6 text-center border ${
+                  className={`group p-6 text-center border-4 border-foreground transition-all ${
                     hasDishes
-                      ? 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:border-orange-400 dark:hover:border-orange-500'
-                      : 'bg-gray-100 dark:bg-gray-900 border-gray-300 dark:border-gray-800 opacity-60'
+                      ? 'bg-card shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:bg-muted'
+                      : 'bg-muted shadow-[4px_4px_0px_0px_rgba(0,0,0,0.3)] opacity-60'
                   }`}
                 >
-                  <h3 className={`text-lg font-semibold transition-colors ${
+                  <h3 className={`text-lg md:text-xl font-bold uppercase tracking-wide transition-colors ${
                     hasDishes
-                      ? 'text-gray-900 dark:text-white group-hover:text-orange-500 dark:group-hover:text-orange-400'
-                      : 'text-gray-500 dark:text-gray-600'
+                      ? 'text-foreground group-hover:text-primary'
+                      : 'text-muted-foreground'
                   }`}>
                     {neighborhood}
                   </h3>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  <p className="text-sm text-muted-foreground mt-2 uppercase tracking-wide font-bold">
                     {hasDishes ? 'Top 10 dishes' : 'No dishes yet'}
                   </p>
                 </Link>
@@ -99,21 +99,21 @@ export default async function BestOfPage() {
 
         {/* Browse by Food Type Section */}
         <section>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center">
-            <span className="mr-3">🍜</span>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-8 flex items-center uppercase tracking-tight">
+            <span className="mr-4 text-4xl">🍜</span>
             Browse by Food Type
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {popularCategories.map((category) => (
               <Link
                 key={category}
                 href={`/best-of/food/${encodeURIComponent(category)}`}
-                className="group bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-all p-6 text-center border border-gray-200 dark:border-gray-700 hover:border-orange-400 dark:hover:border-orange-500"
+                className="group bg-card p-6 text-center border-4 border-foreground shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all hover:bg-muted"
               >
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors">
+                <h3 className="text-lg md:text-xl font-bold text-foreground group-hover:text-primary transition-colors uppercase tracking-wide">
                   {category}
                 </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                <p className="text-sm text-muted-foreground mt-2 uppercase tracking-wide font-bold">
                   Top 10 in JC
                 </p>
               </Link>

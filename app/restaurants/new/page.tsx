@@ -17,29 +17,54 @@ export default function NewDishPage() {
   const [photos, setPhotos] = useState<Array<{ url: string; path: string }>>([])
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string | null>(null)
   const [neighborhoods, setNeighborhoods] = useState<string[]>([])
+  const [categories, setCategories] = useState<string[]>([])
 
   const [formData, setFormData] = useState({
     restaurantName: '',
     area: '',
     dishName: '',
+    dishCategory: '',
     rating: 0,
+    would_order_again: null as boolean | null,
   })
 
-  // Fetch unique neighborhoods from Supabase
+  // Fetch unique neighborhoods and categories from Supabase
   useEffect(() => {
-    async function fetchNeighborhoods() {
-      const { data } = await supabase
+    async function fetchData() {
+      // Fetch neighborhoods
+      const { data: neighborhoodData } = await supabase
         .from('restaurants')
         .select('neighborhood')
         .eq('city', 'Jersey City')
         .not('neighborhood', 'is', null)
 
-      if (data) {
-        const uniqueNeighborhoods = [...new Set(data.map(r => r.neighborhood))].sort()
+      if (neighborhoodData) {
+        const uniqueNeighborhoods = [...new Set(neighborhoodData.map(r => r.neighborhood))].sort()
         setNeighborhoods(uniqueNeighborhoods)
       }
+
+      // Fetch categories
+      const { data: categoryData } = await supabase
+        .from('dishes')
+        .select('category')
+        .not('category', 'is', null)
+
+      if (categoryData) {
+        const categoryCounts = categoryData.reduce((acc, dish) => {
+          if (dish.category) {
+            acc[dish.category] = (acc[dish.category] || 0) + 1
+          }
+          return acc
+        }, {} as Record<string, number>)
+
+        const sortedCategories = Object.entries(categoryCounts)
+          .sort((a, b) => b[1] - a[1])
+          .map(([category]) => category)
+
+        setCategories(sortedCategories)
+      }
     }
-    fetchNeighborhoods()
+    fetchData()
   }, [supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -111,21 +136,47 @@ export default function NewDishPage() {
         }
       }
 
-      // Create the dish
-      const { data: dish, error: dishError } = await supabase
+      // Check if dish already exists for this restaurant
+      const { data: existingDish } = await supabase
         .from('dishes')
-        .insert({
-          restaurant_id: restaurant.id,
-          name: formData.dishName,
-          added_by: user?.id || null,
-        })
-        .select()
-        .single()
+        .select('id')
+        .eq('restaurant_id', restaurant.id)
+        .eq('name', formData.dishName)
+        .maybeSingle()
 
-      if (dishError) throw dishError
+      let dish
+      if (existingDish) {
+        dish = existingDish
+      } else {
+        // Create new dish
+        const { data: newDish, error: dishError } = await supabase
+          .from('dishes')
+          .insert({
+            restaurant_id: restaurant.id,
+            name: formData.dishName,
+            category: formData.dishCategory || null,
+            description: null,
+            price: null,
+            added_by: user?.id || null,
+          })
+          .select()
+          .single()
+
+        if (dishError) throw dishError
+        dish = newDish
+      }
 
       // Create initial rating if user provided one
       if (formData.rating > 0 && user) {
+        // Check if this is user's first rating
+        const { data: userProfile } = await supabase
+          .from('profiles')
+          .select('first_rating_completed')
+          .eq('id', user.id)
+          .single()
+
+        const isFirstRating = !userProfile?.first_rating_completed
+
         const { error: ratingError } = await supabase
           .from('ratings')
           .insert({
@@ -134,11 +185,26 @@ export default function NewDishPage() {
             user_id: user.id,
             rating: formData.rating,
             review_text: null,
-            would_order_again: null,
+            would_order_again: formData.would_order_again,
           })
 
         if (ratingError) {
+          // Check if unique constraint violation
+          if (ratingError.code === '23505') {
+            // User already rated this dish - redirect to dish page to update
+            router.push(`/dishes/${dish.id}`)
+            return
+          }
           console.error('Error saving rating:', ratingError)
+        } else if (isFirstRating) {
+          // Update profile for first rating
+          await supabase
+            .from('profiles')
+            .update({
+              first_rating_completed: true,
+              current_gift: 'egg'
+            })
+            .eq('id', user.id)
         }
       }
 
@@ -158,8 +224,8 @@ export default function NewDishPage() {
         if (photoError) console.error('Error saving photos:', photoError)
       }
 
-      // Redirect to home page
-      router.push('/')
+      // Redirect to dish page
+      router.push(`/dishes/${dish.id}`)
     } catch (err) {
       console.error('Error creating dish:', err)
       setError(err instanceof Error ? err.message : 'Failed to create dish')
@@ -177,8 +243,8 @@ export default function NewDishPage() {
         <div className="bg-card border-4 border-foreground shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 md:p-8">
           {/* Form Header */}
           <div className="mb-6 pb-6 border-b-4 border-foreground">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 uppercase tracking-tight">Add a Dish</h1>
-            <p className="text-lg text-muted-foreground uppercase tracking-wide">Add a dish from Jersey City</p>
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 uppercase tracking-tight">Add & Rate a Dish</h1>
+            <p className="text-lg text-muted-foreground uppercase tracking-wide">Add a new dish and share your rating</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -231,7 +297,7 @@ export default function NewDishPage() {
 
             <div>
               <label htmlFor="dish" className="block text-base md:text-lg font-bold text-foreground mb-3 uppercase tracking-wide">
-                Dish *
+                Dish Name *
               </label>
               <input
                 type="text"
@@ -244,13 +310,63 @@ export default function NewDishPage() {
               />
             </div>
 
+            <div>
+              <label htmlFor="category" className="block text-base md:text-lg font-bold text-foreground mb-3 uppercase tracking-wide">
+                Category (optional)
+              </label>
+              <select
+                id="category"
+                value={formData.dishCategory}
+                onChange={(e) => setFormData({ ...formData, dishCategory: e.target.value })}
+                className="w-full px-4 py-3 text-base border-4 border-foreground bg-background text-foreground focus:ring-4 focus:ring-primary focus:border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all font-bold"
+              >
+                <option value="">Select a category</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Rating Slider */}
             <div className="bg-muted border-4 border-foreground p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
               <RatingSlider
                 value={formData.rating}
                 onChange={(rating) => setFormData({ ...formData, rating })}
-                label="Rate This Taco (optional)"
+                label="Your Rating (optional)"
               />
+            </div>
+
+            {/* Would Order Again */}
+            <div>
+              <label className="block text-base md:text-lg font-bold text-foreground mb-3 uppercase tracking-wide">
+                Would you order this again?
+              </label>
+              <div className="flex gap-4">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, would_order_again: true })}
+                  className={`flex-1 px-6 py-4 border-4 border-foreground font-bold text-lg uppercase tracking-wide transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] ${
+                    formData.would_order_again === true
+                      ? 'bg-secondary text-secondary-foreground'
+                      : 'bg-background text-foreground hover:bg-muted'
+                  }`}
+                >
+                  ✅ Yes
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, would_order_again: false })}
+                  className={`flex-1 px-6 py-4 border-4 border-foreground font-bold text-lg uppercase tracking-wide transition-all shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] ${
+                    formData.would_order_again === false
+                      ? 'bg-destructive text-destructive-foreground'
+                      : 'bg-background text-foreground hover:bg-muted'
+                  }`}
+                >
+                  ❌ No
+                </button>
+              </div>
             </div>
 
             {/* Photo Upload */}
@@ -292,7 +408,7 @@ export default function NewDishPage() {
                 disabled={loading}
                 className="flex-1 bg-primary text-primary-foreground px-8 py-5 text-xl border-4 border-foreground shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 disabled:cursor-not-allowed font-bold uppercase tracking-wide transition-all"
               >
-                {loading ? 'Adding...' : 'Add Dish'}
+                {loading ? 'Submitting...' : 'Add & Rate Dish'}
               </button>
               <Link
                 href="/"

@@ -12,7 +12,7 @@ export default async function BestOfAreaPage({ params }: PageProps) {
   const decodedArea = decodeURIComponent(area);
   const supabase = await createClient();
 
-  // Fetch top 10 dishes in this area, sorted by average rating
+  // Fetch top 10 dishes in this neighborhood, sorted by average rating
   const { data: dishes, error } = await supabase
     .from('dishes')
     .select(`
@@ -20,18 +20,15 @@ export default async function BestOfAreaPage({ params }: PageProps) {
       restaurants!inner (
         id,
         name,
-        area,
         address,
         neighborhood
       ),
       photos (
         id,
-        photo_url,
-        caption
+        url
       )
     `)
-    .eq('restaurants.area', decodedArea)
-    .eq('restaurants.city', 'Jersey City')
+    .eq('restaurants.neighborhood', decodedArea)
     .not('average_rating', 'is', null)
     .gte('rating_count', 1)
     .order('average_rating', { ascending: false })
@@ -42,20 +39,20 @@ export default async function BestOfAreaPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pb-12">
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
+    <div className="min-h-screen bg-background pb-12">
+      <div className="container mx-auto px-6 py-8 max-w-6xl">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-8 md:mb-12 border-b-4 border-foreground pb-6">
           <Link
             href="/best-of"
-            className="text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 mb-4 inline-flex items-center"
+            className="text-primary hover:text-primary/80 mb-4 inline-flex items-center font-bold uppercase tracking-wide text-sm transition-colors"
           >
             ← Back to Best Of
           </Link>
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white mt-4 mb-2">
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mt-4 mb-3 uppercase tracking-tight">
             Top 10 Dishes in {decodedArea}
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-lg md:text-xl text-muted-foreground uppercase tracking-wide font-bold">
             The highest-rated dishes in this neighborhood
           </p>
         </div>
@@ -70,48 +67,48 @@ export default async function BestOfAreaPage({ params }: PageProps) {
               <Link
                 key={dish.id}
                 href={`/dishes/${dish.id}`}
-                className="block bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-xl transition-all border border-gray-200 dark:border-gray-700 hover:border-orange-400 dark:hover:border-orange-500 overflow-hidden"
+                className="block bg-card border-4 border-foreground shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all hover:bg-muted overflow-hidden"
               >
-                <div className="flex flex-col md:flex-row">
+                <div className="flex flex-col md:flex-row relative">
                   {/* Ranking Badge */}
-                  <div className="absolute top-4 left-4 z-10 bg-orange-500 text-white font-bold text-2xl w-12 h-12 rounded-full flex items-center justify-center shadow-lg">
+                  <div className="absolute top-4 left-4 z-10 bg-primary text-primary-foreground font-bold text-2xl w-14 h-14 border-4 border-foreground flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                     {index + 1}
                   </div>
 
                   {/* Image */}
-                  <div className="relative w-full md:w-64 h-48 bg-gray-200 dark:bg-gray-700">
+                  <div className="relative w-full md:w-64 h-48 bg-muted border-b-4 md:border-b-0 md:border-r-4 border-foreground">
                     {firstPhoto ? (
                       <Image
-                        src={firstPhoto.photo_url}
+                        src={firstPhoto.url}
                         alt={dish.name}
                         fill
                         className="object-cover"
                       />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
-                        <span className="text-4xl">🍽️</span>
+                      <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                        <span className="text-6xl">🍽️</span>
                       </div>
                     )}
                   </div>
 
                   {/* Content */}
                   <div className="flex-1 p-6">
-                    <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
+                        <h3 className="text-2xl md:text-3xl font-bold text-foreground mb-2 uppercase tracking-tight">
                           {dish.name}
                         </h3>
-                        <p className="text-orange-500 dark:text-orange-400 font-medium">
+                        <p className="text-primary font-bold text-lg uppercase tracking-wide">
                           {restaurant?.name}
                         </p>
                       </div>
 
                       {/* Rating */}
                       <div className="ml-4 text-right">
-                        <div className="text-3xl font-bold text-orange-500 dark:text-orange-400">
+                        <div className="text-4xl font-bold text-secondary">
                           {dish.average_rating?.toFixed(1)}
                         </div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                        <div className="text-sm text-muted-foreground font-bold uppercase tracking-wide">
                           {dish.rating_count} {dish.rating_count === 1 ? 'rating' : 'ratings'}
                         </div>
                       </div>
@@ -119,25 +116,25 @@ export default async function BestOfAreaPage({ params }: PageProps) {
 
                     {/* Description */}
                     {dish.description && (
-                      <p className="text-gray-600 dark:text-gray-300 mb-3 line-clamp-2">
+                      <p className="text-foreground mb-4 line-clamp-2">
                         {dish.description}
                       </p>
                     )}
 
                     {/* Meta info */}
-                    <div className="flex flex-wrap gap-3 text-sm text-gray-500 dark:text-gray-400">
+                    <div className="flex flex-wrap gap-3 text-sm">
                       {dish.category && (
-                        <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full">
+                        <span className="px-3 py-1 bg-secondary text-secondary-foreground border-2 border-foreground font-bold uppercase tracking-wide">
                           {dish.category}
                         </span>
                       )}
                       {dish.price && (
-                        <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full">
+                        <span className="px-3 py-1 bg-muted text-foreground border-2 border-foreground font-bold uppercase tracking-wide">
                           ${dish.price}
                         </span>
                       )}
                       {restaurant?.neighborhood && (
-                        <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 rounded-full">
+                        <span className="px-3 py-1 bg-muted text-muted-foreground border-2 border-foreground font-bold uppercase tracking-wide">
                           {restaurant.neighborhood}
                         </span>
                       )}
