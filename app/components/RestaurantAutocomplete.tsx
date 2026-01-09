@@ -102,24 +102,24 @@ export default function RestaurantAutocomplete({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         onFocus={() => setShowSuggestions(true)}
-        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
+        className="w-full px-4 py-3 text-base border-4 border-foreground bg-background text-foreground focus:ring-4 focus:ring-primary focus:border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
         placeholder="Taqueria Downtown"
         autoComplete="off"
       />
 
       {/* Suggestions Dropdown */}
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
+        <div className="absolute z-10 w-full mt-2 bg-card border-4 border-foreground shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] max-h-60 overflow-auto">
           {suggestions.map((restaurant) => (
             <button
               key={restaurant.id}
               type="button"
               onClick={() => handleSelect(restaurant)}
-              className="w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors border-b last:border-b-0"
+              className="w-full px-4 py-3 text-left hover:bg-muted transition-colors border-b-2 border-border last:border-b-0"
             >
-              <div className="font-medium text-gray-900">{restaurant.name}</div>
+              <div className="font-bold text-foreground uppercase tracking-wide">{restaurant.name}</div>
               {restaurant.neighborhood && (
-                <div className="text-sm text-gray-500">{restaurant.neighborhood}</div>
+                <div className="text-sm text-muted-foreground font-bold uppercase tracking-wide">{restaurant.neighborhood}</div>
               )}
             </button>
           ))}
@@ -128,8 +128,8 @@ export default function RestaurantAutocomplete({
 
       {/* Loading indicator */}
       {loading && (
-        <div className="absolute right-3 top-3">
-          <div className="animate-spin h-4 w-4 border-2 border-gray-300 border-t-black rounded-full"></div>
+        <div className="absolute right-4 top-4">
+          <div className="animate-spin h-5 w-5 border-2 border-muted-foreground border-t-foreground"></div>
         </div>
       )}
     </div>

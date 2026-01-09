@@ -61,27 +61,27 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-red-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-12">
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="text-center mb-8">
           <Link href="/">
-            <Image 
-              src="/logo.svg" 
-              alt="Hood Eats" 
-              width={300} 
+            <Image
+              src="/logo.svg"
+              alt="Hood Eats"
+              width={300}
               height={300}
-              className="w-64 h-auto mx-auto mb-4"
+              className="w-64 h-auto mx-auto mb-6"
             />
           </Link>
-          <h1 className="text-3xl font-bold mb-2">Welcome back</h1>
-          <p className="text-gray-600">Log in to rate and discover tacos</p>
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-3 uppercase tracking-tight">Welcome Back</h1>
+          <p className="text-lg text-muted-foreground uppercase tracking-wide font-bold">Log in to rate and discover tacos</p>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="bg-card border-4 border-foreground shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 md:p-8">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 text-sm">
-              {error}
+            <div className="bg-destructive text-destructive-foreground border-4 border-foreground px-6 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] mb-6">
+              <p className="font-bold text-base">{error}</p>
             </div>
           )}
 
@@ -89,10 +89,10 @@ export default function LoginPage() {
           <button
             onClick={handleGoogleLogin}
             disabled={googleLoading}
-            className="w-full flex items-center justify-center gap-3 bg-white border-2 border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors font-medium mb-6 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-3 bg-background border-4 border-foreground text-foreground px-6 py-4 hover:bg-muted transition-all font-bold uppercase tracking-wide mb-6 disabled:opacity-50 disabled:cursor-not-allowed shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)]"
           >
             {googleLoading ? (
-              <div className="animate-spin h-5 w-5 border-2 border-gray-300 border-t-black rounded-full"></div>
+              <div className="animate-spin h-5 w-5 border-2 border-muted-foreground border-t-foreground"></div>
             ) : (
               <>
                 <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -121,17 +121,17 @@ export default function LoginPage() {
           {/* Divider */}
           <div className="relative mb-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
+              <div className="w-full border-t-2 border-foreground"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">Or continue with email</span>
+              <span className="px-3 bg-card text-muted-foreground font-bold uppercase tracking-wide">Or continue with email</span>
             </div>
           </div>
 
           {/* Email Login Form */}
-          <form onSubmit={handleEmailLogin} className="space-y-4">
+          <form onSubmit={handleEmailLogin} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="email" className="block text-base md:text-lg font-bold text-foreground mb-3 uppercase tracking-wide">
                 Email
               </label>
               <input
@@ -140,13 +140,13 @@ export default function LoginPage() {
                 required
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 text-base border-4 border-foreground bg-background text-foreground focus:ring-4 focus:ring-primary focus:border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
                 placeholder="you@example.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label htmlFor="password" className="block text-base md:text-lg font-bold text-foreground mb-3 uppercase tracking-wide">
                 Password
               </label>
               <input
@@ -155,7 +155,7 @@ export default function LoginPage() {
                 required
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 text-base border-4 border-foreground bg-background text-foreground focus:ring-4 focus:ring-primary focus:border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
                 placeholder="••••••••"
               />
             </div>
@@ -163,16 +163,16 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-orange-600 to-red-600 text-white px-6 py-3 rounded-lg hover:from-orange-700 hover:to-red-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-primary text-primary-foreground px-8 py-5 text-xl border-4 border-foreground shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 disabled:cursor-not-allowed font-bold uppercase tracking-wide transition-all"
             >
               {loading ? 'Logging in...' : 'Log in'}
             </button>
           </form>
 
           {/* Sign up link */}
-          <p className="text-center text-sm text-gray-600 mt-6">
+          <p className="text-center text-base text-muted-foreground mt-6 font-bold">
             Don't have an account?{' '}
-            <Link href="/auth/signup" className="text-orange-600 hover:text-orange-700 font-medium">
+            <Link href="/auth/signup" className="text-primary hover:underline font-bold uppercase tracking-wide">
               Sign up
             </Link>
           </p>
@@ -180,7 +180,7 @@ export default function LoginPage() {
 
         {/* Back to home */}
         <div className="text-center mt-6">
-          <Link href="/" className="text-sm text-gray-600 hover:text-gray-900">
+          <Link href="/" className="text-base text-muted-foreground hover:text-foreground font-bold uppercase tracking-wide transition-colors">
             ← Back to home
           </Link>
         </div>

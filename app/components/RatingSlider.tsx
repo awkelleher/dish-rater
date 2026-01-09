@@ -39,17 +39,17 @@ export default function RatingSlider({
 
   return (
     <div>
-      <label className="block text-sm font-medium text-gray-700 mb-3">
+      <label className="block text-base md:text-lg font-bold text-foreground mb-3 uppercase tracking-wide">
         {label} {required && '*'}
       </label>
-      
+
       <div className="space-y-4">
         {/* Rating Display */}
         <div className="text-center">
           <div className={`text-6xl font-bold ${getRatingColor(value)} transition-colors`}>
             {value.toFixed(1)}
           </div>
-          <div className="text-sm text-gray-600 font-medium mt-1">
+          <div className="text-base text-muted-foreground font-bold uppercase tracking-wide mt-2">
             {getRatingLabel(value)}
           </div>
         </div>
@@ -67,33 +67,36 @@ export default function RatingSlider({
             onMouseUp={() => setIsDragging(false)}
             onTouchStart={() => setIsDragging(true)}
             onTouchEnd={() => setIsDragging(false)}
-            className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer
+            className="w-full h-4 bg-muted border-2 border-foreground appearance-none cursor-pointer shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
               [&::-webkit-slider-thumb]:appearance-none
-              [&::-webkit-slider-thumb]:w-6
-              [&::-webkit-slider-thumb]:h-6
-              [&::-webkit-slider-thumb]:rounded-full
-              [&::-webkit-slider-thumb]:bg-black
+              [&::-webkit-slider-thumb]:w-7
+              [&::-webkit-slider-thumb]:h-7
+              [&::-webkit-slider-thumb]:bg-secondary
+              [&::-webkit-slider-thumb]:border-2
+              [&::-webkit-slider-thumb]:border-foreground
               [&::-webkit-slider-thumb]:cursor-grab
               [&::-webkit-slider-thumb]:active:cursor-grabbing
               [&::-webkit-slider-thumb]:hover:scale-110
               [&::-webkit-slider-thumb]:transition-transform
-              [&::-moz-range-thumb]:w-6
-              [&::-moz-range-thumb]:h-6
-              [&::-moz-range-thumb]:rounded-full
-              [&::-moz-range-thumb]:bg-black
-              [&::-moz-range-thumb]:border-0
+              [&::-webkit-slider-thumb]:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
+              [&::-moz-range-thumb]:w-7
+              [&::-moz-range-thumb]:h-7
+              [&::-moz-range-thumb]:bg-secondary
+              [&::-moz-range-thumb]:border-2
+              [&::-moz-range-thumb]:border-foreground
               [&::-moz-range-thumb]:cursor-grab
               [&::-moz-range-thumb]:active:cursor-grabbing
               [&::-moz-range-thumb]:hover:scale-110
               [&::-moz-range-thumb]:transition-transform
+              [&::-moz-range-thumb]:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]
             "
             style={{
               background: `linear-gradient(to right, #ef4444 0%, #f59e0b 50%, #10b981 100%)`
             }}
           />
-          
+
           {/* Scale markers */}
-          <div className="flex justify-between text-xs text-gray-400 mt-2 px-1">
+          <div className="flex justify-between text-sm text-muted-foreground font-bold mt-2 px-1">
             <span>0</span>
             <span>2</span>
             <span>4</span>
@@ -110,10 +113,10 @@ export default function RatingSlider({
               key={rating}
               type="button"
               onClick={() => onChange(rating)}
-              className={`px-3 py-1 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-2 text-sm font-bold uppercase tracking-wide transition-all border-2 border-foreground shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] ${
                 Math.abs(value - rating) < 0.5
-                  ? 'bg-black text-white'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-background text-foreground hover:bg-muted'
               }`}
             >
               {rating}

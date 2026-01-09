@@ -2,7 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import RatingForm from './rating-form'
-import Header from '@/app/components/Header'
+import ThemedNavBar from '@/app/components/ThemedNavBar'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 
 export default async function DishPage({ params }: { params: { id: string } }) {
   const supabase = await createClient()
@@ -41,36 +43,36 @@ export default async function DishPage({ params }: { params: { id: string } }) {
     .order('created_at', { ascending: false })
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
+    <div className="min-h-screen bg-background">
+      <ThemedNavBar />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 max-w-4xl">
+      <main className="container mx-auto px-6 py-8 max-w-4xl">
         {/* Dish Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <Card className="border-4 border-foreground shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-card p-6 mb-6">
           <div className="flex justify-between items-start mb-4">
             <div>
-              <h1 className="text-4xl font-bold mb-2">{dish.name}</h1>
-              <Link 
+              <h1 className="text-4xl font-bold text-foreground mb-2">{dish.name}</h1>
+              <Link
                 href={`/restaurants/${dish.restaurants?.id}`}
-                className="text-lg text-gray-600 hover:underline"
+                className="text-lg text-muted-foreground hover:text-foreground transition-colors font-bold uppercase tracking-wide"
               >
                 {dish.restaurants?.name}
               </Link>
               {dish.restaurants?.neighborhood && (
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-muted-foreground mt-1">
                   {dish.restaurants.neighborhood} • {dish.restaurants.address}
                 </p>
               )}
             </div>
-            
+
             {dish.average_rating > 0 && (
               <div className="text-center">
-                <div className="flex items-center gap-2 bg-yellow-100 px-4 py-2 rounded-lg">
-                  <span className="text-yellow-600 text-2xl">⭐</span>
+                <div className="flex items-center gap-2 bg-secondary text-secondary-foreground px-4 py-2 border-2 border-foreground">
+                  <span className="text-2xl">⭐</span>
                   <span className="font-bold text-3xl">{dish.average_rating.toFixed(1)}</span>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-muted-foreground mt-1 uppercase tracking-wide font-bold">
                   {dish.rating_count} {dish.rating_count === 1 ? 'rating' : 'ratings'}
                 </p>
               </div>
@@ -78,46 +80,45 @@ export default async function DishPage({ params }: { params: { id: string } }) {
           </div>
 
           {dish.description && (
-            <p className="text-gray-700 mb-4">{dish.description}</p>
+            <p className="text-foreground mb-4">{dish.description}</p>
           )}
 
           <div className="flex gap-3 text-sm">
-            <span className="bg-gray-100 px-3 py-1 rounded-full">🌮 {dish.category}</span>
+            <Badge className="bg-card text-foreground border-2 border-foreground font-bold">🌮 {dish.category}</Badge>
             {dish.price && (
-              <span className="bg-green-100 text-green-800 px-3 py-1 rounded-full font-medium">
+              <Badge className="bg-secondary text-secondary-foreground border-2 border-foreground font-bold">
                 ${dish.price.toFixed(2)}
-              </span>
+              </Badge>
             )}
           </div>
-        </div>
+        </Card>
 
         {/* Rating Form */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-          <h2 className="text-2xl font-bold mb-4">Rate This Taco</h2>
+        <div className="mb-6">
           <RatingForm dishId={dishId} restaurantId={dish.restaurant_id} />
         </div>
 
         {/* Ratings List */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h2 className="text-2xl font-bold mb-6">
+        <Card className="border-4 border-foreground shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-card p-6">
+          <h2 className="text-2xl font-bold text-foreground mb-6">
             Reviews ({ratings?.length || 0})
           </h2>
 
           {ratings && ratings.length > 0 ? (
             <div className="space-y-6">
               {ratings.map((rating) => (
-                <div key={rating.id} className="border-b last:border-b-0 pb-6 last:pb-0">
+                <div key={rating.id} className="border-b-2 border-border last:border-b-0 pb-6 last:pb-0">
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0">
                       {rating.profiles?.avatar_url ? (
-                        <img 
-                          src={rating.profiles.avatar_url} 
+                        <img
+                          src={rating.profiles.avatar_url}
                           alt={rating.profiles.username}
-                          className="w-12 h-12 rounded-full"
+                          className="w-12 h-12 border-2 border-foreground"
                         />
                       ) : (
-                        <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center">
-                          <span className="text-gray-600 font-medium">
+                        <div className="w-12 h-12 bg-muted border-2 border-foreground flex items-center justify-center">
+                          <span className="text-foreground font-bold">
                             {rating.profiles?.username?.[0]?.toUpperCase() || '?'}
                           </span>
                         </div>
@@ -126,22 +127,21 @@ export default async function DishPage({ params }: { params: { id: string } }) {
 
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <span className="font-semibold">{rating.profiles?.username}</span>
-                        <div className="flex items-center gap-1 bg-yellow-100 px-2 py-1 rounded">
-                          <span className="text-yellow-600">⭐</span>
-                          <span className="font-semibold">{rating.rating.toFixed(1)}</span>
-                        </div>
-                        <span className="text-sm text-gray-500">
+                        <span className="font-bold text-foreground">{rating.profiles?.username}</span>
+                        <Badge className="bg-secondary text-secondary-foreground border-2 border-foreground font-bold">
+                          ⭐ {rating.rating.toFixed(1)}
+                        </Badge>
+                        <span className="text-sm text-muted-foreground uppercase tracking-wide font-bold">
                           {new Date(rating.created_at).toLocaleDateString()}
                         </span>
                       </div>
 
                       {rating.review_text && (
-                        <p className="text-gray-700 mb-2">{rating.review_text}</p>
+                        <p className="text-foreground mb-2">{rating.review_text}</p>
                       )}
 
                       {rating.would_order_again !== null && (
-                        <p className="text-sm text-gray-600">
+                        <p className="text-sm text-foreground font-bold">
                           {rating.would_order_again ? '✅ Would order again' : '❌ Would not order again'}
                         </p>
                       )}
@@ -151,11 +151,11 @@ export default async function DishPage({ params }: { params: { id: string } }) {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500 text-center py-8">
+            <p className="text-muted-foreground text-center py-8 uppercase tracking-wide font-bold">
               No reviews yet. Be the first to rate this taco!
             </p>
           )}
-        </div>
+        </Card>
       </main>
     </div>
   )

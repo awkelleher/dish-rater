@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import ClientDarkNavBar from '@/app/components/ClientDarkNavBar'
+import ClientThemedNavBar from '@/app/components/ClientThemedNavBar'
 import PhotoUpload from '@/app/components/PhotoUpload'
 import RestaurantAutocomplete from '@/app/components/RestaurantAutocomplete'
 import RatingSlider from '@/app/components/RatingSlider'
@@ -16,6 +16,7 @@ export default function NewDishPage() {
   const [error, setError] = useState<string | null>(null)
   const [photos, setPhotos] = useState<Array<{ url: string; path: string }>>([])
   const [selectedRestaurantId, setSelectedRestaurantId] = useState<string | null>(null)
+  const [neighborhoods, setNeighborhoods] = useState<string[]>([])
 
   const [formData, setFormData] = useState({
     restaurantName: '',
@@ -23,6 +24,23 @@ export default function NewDishPage() {
     dishName: '',
     rating: 0,
   })
+
+  // Fetch unique neighborhoods from Supabase
+  useEffect(() => {
+    async function fetchNeighborhoods() {
+      const { data } = await supabase
+        .from('restaurants')
+        .select('neighborhood')
+        .eq('city', 'Jersey City')
+        .not('neighborhood', 'is', null)
+
+      if (data) {
+        const uniqueNeighborhoods = [...new Set(data.map(r => r.neighborhood))].sort()
+        setNeighborhoods(uniqueNeighborhoods)
+      }
+    }
+    fetchNeighborhoods()
+  }, [supabase])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -151,138 +169,140 @@ export default function NewDishPage() {
   }
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-white">
-      <ClientDarkNavBar />
+    <div className="min-h-screen bg-background">
+      <ClientThemedNavBar />
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Add a Dish</h1>
-          <p className="text-gray-400">Add a dish from Jersey City</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6 space-y-6">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label htmlFor="restaurant" className="block text-sm font-medium text-gray-700 mb-2">
-              Restaurant *
-            </label>
-            <RestaurantAutocomplete
-              value={formData.restaurantName}
-              onChange={(name, id) => {
-                console.log('onChange called with name:', name, 'id:', id)
-                setFormData(prev => ({ ...prev, restaurantName: name }))
-                setSelectedRestaurantId(id || null)
-              }}
-              onNeighborhoodSelect={(neighborhood) => {
-                console.log('onNeighborhoodSelect called with:', neighborhood)
-                setFormData(prev => ({ ...prev, area: neighborhood }))
-              }}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Start typing to see existing restaurants
-            </p>
+      <main className="container mx-auto px-6 py-8 max-w-3xl">
+        <div className="bg-card border-4 border-foreground shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] p-6 md:p-8">
+          {/* Form Header */}
+          <div className="mb-6 pb-6 border-b-4 border-foreground">
+            <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2 uppercase tracking-tight">Add a Dish</h1>
+            <p className="text-lg text-muted-foreground uppercase tracking-wide">Add a dish from Jersey City</p>
           </div>
 
-          <div>
-            <label htmlFor="area" className="block text-sm font-medium text-gray-700 mb-2">
-              Neighborhood *
-            </label>
-            <select
-              id="area"
-              required
-              value={formData.area}
-              onChange={(e) => setFormData({ ...formData, area: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-            >
-              <option value="">Select a neighborhood</option>
-              <option value="BERGEN-LAFAYETTE">BERGEN-LAFAYETTE</option>
-              <option value="Downtown">Downtown</option>
-              <option value="Exchange Place">Exchange Place</option>
-              <option value="GREENVILLE">GREENVILLE</option>
-              <option value="Grove Street">Grove Street</option>
-              <option value="JOURNAL SQUARE">JOURNAL SQUARE</option>
-              <option value="Newport">Newport</option>
-              <option value="Paulus Hook">Paulus Hook</option>
-              <option value="THE HEIGHTS">THE HEIGHTS</option>
-              <option value="Van Vorst Park">Van Vorst Park</option>
-              <option value="WEST SIDE">WEST SIDE</option>
-            </select>
-          </div>
-
-          <div>
-            <label htmlFor="dish" className="block text-sm font-medium text-gray-700 mb-2">
-              Dish *
-            </label>
-            <input
-              type="text"
-              id="dish"
-              required
-              value={formData.dishName}
-              onChange={(e) => setFormData({ ...formData, dishName: e.target.value })}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-              placeholder="Al Pastor Taco"
-            />
-          </div>
-
-          {/* Rating Slider */}
-          <RatingSlider
-            value={formData.rating}
-            onChange={(rating) => setFormData({ ...formData, rating })}
-            label="Rate This Taco (optional)"
-          />
-
-          {/* Photo Upload */}
-          <div>
-            <PhotoUpload
-              onPhotoUploaded={(url, path) => setPhotos([...photos, { url, path }])}
-              currentPhotos={photos.map(p => p.url)}
-            />
-            
-            {/* Show uploaded photos */}
-            {photos.length > 0 && (
-              <div className="mt-4 grid grid-cols-3 gap-3">
-                {photos.map((photo, index) => (
-                  <div key={index} className="relative group">
-                    <img 
-                      src={photo.url} 
-                      alt={`Upload ${index + 1}`}
-                      className="w-full h-24 object-cover rounded-lg"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setPhotos(photos.filter((_, i) => i !== index))}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                    >
-                      ×
-                    </button>
-                  </div>
-                ))}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-destructive text-destructive-foreground border-4 border-foreground px-6 py-4 shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
+                <p className="font-bold text-lg">{error}</p>
               </div>
             )}
-          </div>
 
-          <div className="flex gap-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex-1 bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed font-medium"
-            >
-              {loading ? 'Adding...' : 'Add Dish'}
-            </button>
-            <Link
-              href="/explore"
-              className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium text-center"
-            >
-              Cancel
-            </Link>
-          </div>
-        </form>
+            <div>
+              <label htmlFor="restaurant" className="block text-base md:text-lg font-bold text-foreground mb-3 uppercase tracking-wide">
+                Restaurant *
+              </label>
+              <RestaurantAutocomplete
+                value={formData.restaurantName}
+                onChange={(name, id) => {
+                  console.log('onChange called with name:', name, 'id:', id)
+                  setFormData(prev => ({ ...prev, restaurantName: name }))
+                  setSelectedRestaurantId(id || null)
+                }}
+                onNeighborhoodSelect={(neighborhood) => {
+                  console.log('onNeighborhoodSelect called with:', neighborhood)
+                  setFormData(prev => ({ ...prev, area: neighborhood }))
+                }}
+              />
+              <p className="text-sm text-muted-foreground mt-2 uppercase tracking-wide font-bold">
+                Start typing to see existing restaurants
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="area" className="block text-base md:text-lg font-bold text-foreground mb-3 uppercase tracking-wide">
+                Neighborhood *
+              </label>
+              <select
+                id="area"
+                required
+                value={formData.area}
+                onChange={(e) => setFormData({ ...formData, area: e.target.value })}
+                className="w-full px-4 py-3 text-base border-4 border-foreground bg-background text-foreground focus:ring-4 focus:ring-primary focus:border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all font-bold"
+              >
+                <option value="">Select a neighborhood</option>
+                {neighborhoods.map((neighborhood) => (
+                  <option key={neighborhood} value={neighborhood}>
+                    {neighborhood}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="dish" className="block text-base md:text-lg font-bold text-foreground mb-3 uppercase tracking-wide">
+                Dish *
+              </label>
+              <input
+                type="text"
+                id="dish"
+                required
+                value={formData.dishName}
+                onChange={(e) => setFormData({ ...formData, dishName: e.target.value })}
+                className="w-full px-4 py-3 text-base border-4 border-foreground bg-background text-foreground focus:ring-4 focus:ring-primary focus:border-primary shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] focus:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all"
+                placeholder="Al Pastor Taco"
+              />
+            </div>
+
+            {/* Rating Slider */}
+            <div className="bg-muted border-4 border-foreground p-6 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+              <RatingSlider
+                value={formData.rating}
+                onChange={(rating) => setFormData({ ...formData, rating })}
+                label="Rate This Taco (optional)"
+              />
+            </div>
+
+            {/* Photo Upload */}
+            <div>
+              <label className="block text-base md:text-lg font-bold text-foreground mb-3 uppercase tracking-wide">
+                Add Photos (optional)
+              </label>
+              <PhotoUpload
+                onPhotoUploaded={(url, path) => setPhotos([...photos, { url, path }])}
+                currentPhotos={photos.map(p => p.url)}
+              />
+
+              {/* Show uploaded photos */}
+              {photos.length > 0 && (
+                <div className="mt-4 grid grid-cols-3 gap-4">
+                  {photos.map((photo, index) => (
+                    <div key={index} className="relative group border-4 border-foreground shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]">
+                      <img
+                        src={photo.url}
+                        alt={`Upload ${index + 1}`}
+                        className="w-full h-28 object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setPhotos(photos.filter((_, i) => i !== index))}
+                        className="absolute top-2 right-2 bg-destructive text-destructive-foreground border-2 border-foreground w-8 h-8 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-xl font-bold shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-4 pt-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex-1 bg-primary text-primary-foreground px-8 py-5 text-xl border-4 border-foreground shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] disabled:opacity-50 disabled:cursor-not-allowed font-bold uppercase tracking-wide transition-all"
+              >
+                {loading ? 'Adding...' : 'Add Dish'}
+              </button>
+              <Link
+                href="/"
+                className="px-8 py-5 text-xl border-4 border-foreground bg-background text-foreground hover:bg-muted font-bold uppercase tracking-wide transition-all shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] active:shadow-[1px_1px_0px_0px_rgba(0,0,0,1)] text-center"
+              >
+                Cancel
+              </Link>
+            </div>
+          </form>
+        </div>
       </main>
     </div>
   )
