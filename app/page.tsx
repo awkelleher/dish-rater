@@ -1,164 +1,184 @@
 import Link from 'next/link'
-import Image from 'next/image'
-import DarkNavBar from './components/DarkNavBar'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 
-const QUICK_CATEGORIES = [
-  { name: 'Tacos', emoji: '🌮', category: 'Taco' },
-  { name: 'Pizza', emoji: '🍕', category: 'Pizza' },
-  { name: 'Burgers', emoji: '🍔', category: 'Burger' },
-  { name: 'Ramen', emoji: '🍜', category: 'Ramen' },
-]
+export default function Home() {
+  // Sample data - replace with real data from your Supabase when ready
+  const downtownTop10 = [
+    { rank: 1, dish: 'Margherita Pizza', restaurant: 'Razza', neighborhood: 'Downtown', rating: 9.8 },
+    { rank: 2, dish: 'Spicy Tonkotsu Ramen', restaurant: 'Ani Ramen', neighborhood: 'Downtown', rating: 9.7 },
+    { rank: 3, dish: 'Breakfast Burrito', restaurant: 'Taqueria Downtown', neighborhood: 'Downtown', rating: 9.5 },
+    { rank: 4, dish: 'Chicken Parm Sandwich', restaurant: 'Raval', neighborhood: 'Downtown', rating: 9.4 },
+    { rank: 5, dish: 'Pastrami Sandwich', restaurant: 'Sam\'s Deli', neighborhood: 'Downtown', rating: 9.3 },
+    { rank: 6, dish: 'Pad Thai', restaurant: 'Bangkok Kitchen', neighborhood: 'Downtown', rating: 9.2 },
+    { rank: 7, dish: 'Fried Chicken', restaurant: 'South House', neighborhood: 'Downtown', rating: 9.1 },
+    { rank: 8, dish: 'Bacon Egg & Cheese', restaurant: 'Grace O\'Malley\'s', neighborhood: 'Downtown', rating: 9.0 },
+    { rank: 9, dish: 'Empanadas', restaurant: 'Empanada Lady', neighborhood: 'Downtown', rating: 8.9 },
+    { rank: 10, dish: 'Chocolate Chip Cookie', restaurant: 'Levain Bakery', neighborhood: 'Downtown', rating: 8.8 },
+  ]
 
-const POPULAR_NEIGHBORHOODS = [
-  'Downtown', 'Paulus Hook', 'Journal Square', 
-  'The Heights', 'Newport', 'Grove Street'
-]
+  const bestTacos = [
+    { rank: 1, dish: 'Al Pastor Taco', restaurant: 'Taqueria Downtown', neighborhood: 'Downtown', rating: 9.9 },
+    { rank: 2, dish: 'Carnitas Taco', restaurant: 'Tacoria', neighborhood: 'Grove Street', rating: 9.7 },
+    { rank: 3, dish: 'Fish Taco', restaurant: 'Taco Thursdays', neighborhood: 'Paulus Hook', rating: 9.6 },
+    { rank: 4, dish: 'Birria Taco', restaurant: 'La Frontera', neighborhood: 'Journal Square', rating: 9.5 },
+    { rank: 5, dish: 'Carne Asada Taco', restaurant: 'Taco Express', neighborhood: 'The Heights', rating: 9.4 },
+    { rank: 6, dish: 'Lengua Taco', restaurant: 'Cinco De Mayo', neighborhood: 'Downtown', rating: 9.2 },
+    { rank: 7, dish: 'Shrimp Taco', restaurant: 'Los Cuernos', neighborhood: 'Newport', rating: 9.1 },
+    { rank: 8, dish: 'Vegetarian Taco', restaurant: 'Taqueria Vegana', neighborhood: 'Grove Street', rating: 9.0 },
+    { rank: 9, dish: 'Chorizo Taco', restaurant: 'Taco Stop', neighborhood: 'Paulus Hook', rating: 8.9 },
+    { rank: 10, dish: 'Barbacoa Taco', restaurant: 'El Patron', neighborhood: 'Journal Square', rating: 8.8 },
+  ]
 
-export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-zinc-900 text-white">
-      {/* Navigation */}
-      <DarkNavBar />
-
-      {/* Hero - Action First */}
-      <main className="container mx-auto px-4">
-        <div className="max-w-4xl mx-auto pt-16 pb-12">
-          {/* Main Value Prop */}
-          <h1 className="text-5xl md:text-7xl font-black mb-4 leading-tight">
-            Find something
-            <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">
-              reliably good
-            </span>
-            <br />
-            in 30 seconds
-          </h1>
-          
-          <p className="text-xl text-zinc-400 mb-12 max-w-2xl">
-            Real ratings from real people in your hood. No BS, just good food.
-          </p>
-
-          {/* Quick Action Cards */}
-          <div className="grid md:grid-cols-2 gap-4 mb-12">
-            {/* Top 10 Quick Hit */}
-            <Link
-              href="/best-of"
-              className="group relative overflow-hidden bg-gradient-to-br from-orange-600 to-red-700 rounded-2xl p-8 hover:scale-[1.02] transition-transform"
+    <div className="min-h-screen bg-background">
+      {/* Header */}
+      <header className="border-b-4 border-foreground py-6 px-6">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground tracking-tight">HOOD EATS</h1>
+            <p className="text-lg md:text-xl text-muted-foreground mt-1 uppercase tracking-wide">Bite the Block</p>
+          </div>
+          <Link href="/auth/signup">
+            <Button
+              size="lg"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-lg border-2 border-foreground shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
             >
-              <div className="relative z-10">
-                <div className="text-4xl mb-3">⚡</div>
-                <h3 className="text-2xl font-bold mb-2">Best Of JC</h3>
-                <p className="text-orange-100">Top dishes by area or food type</p>
-              </div>
-              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
-            </Link>
-
-            {/* Find by Location */}
-            <Link 
-              href="/explore?view=neighborhood"
-              className="group relative overflow-hidden bg-zinc-800 border-2 border-zinc-700 hover:border-orange-500 rounded-2xl p-8 hover:scale-[1.02] transition-all"
-            >
-              <div className="relative z-10">
-                <div className="text-4xl mb-3">📍</div>
-                <h3 className="text-2xl font-bold mb-2">By Neighborhood</h3>
-                <p className="text-zinc-400">What's good near you?</p>
-              </div>
-            </Link>
-          </div>
-
-          {/* Quick Category Pills */}
-          <div className="mb-12">
-            <p className="text-sm text-zinc-500 uppercase tracking-wider mb-4">Quick Search</p>
-            <div className="flex flex-wrap gap-3">
-              {QUICK_CATEGORIES.map((cat) => (
-                <Link
-                  key={cat.category}
-                  href={`/explore?view=category&category=${cat.category}`}
-                  className="px-5 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-semibold transition-colors border border-zinc-700 hover:border-orange-500"
-                >
-                  {cat.emoji} {cat.name}
-                </Link>
-              ))}
-              <Link
-                href="/best-of"
-                className="px-5 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-semibold transition-colors border border-zinc-700 hover:border-yellow-500"
-              >
-                ⭐ Best Of
-              </Link>
-            </div>
-          </div>
-
-          {/* Popular Neighborhoods - Quick Access */}
-          <div className="border-t border-zinc-800 pt-8">
-            <p className="text-sm text-zinc-500 uppercase tracking-wider mb-4">Popular Hoods</p>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {POPULAR_NEIGHBORHOODS.map((hood) => (
-                <Link
-                  key={hood}
-                  href={`/explore?view=neighborhood&neighborhood=${encodeURIComponent(hood)}`}
-                  className="px-4 py-3 bg-zinc-800/50 hover:bg-zinc-800 rounded-lg text-sm font-medium transition-colors text-center border border-zinc-800 hover:border-zinc-700"
-                >
-                  {hood}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* How It Works - Minimal */}
-        <div className="max-w-6xl mx-auto py-20 border-t border-zinc-800">
-          <div className="grid md:grid-cols-3 gap-12">
-            <div>
-              <div className="text-3xl mb-3">🔍</div>
-              <h3 className="text-xl font-bold mb-2">Find</h3>
-              <p className="text-zinc-400 text-sm">
-                Search by hood, dish type, or just browse the top-rated
-              </p>
-            </div>
-
-            <div>
-              <div className="text-3xl mb-3">⭐</div>
-              <h3 className="text-xl font-bold mb-2">Trust</h3>
-              <p className="text-zinc-400 text-sm">
-                Real ratings from people who actually ate there
-              </p>
-            </div>
-
-            <div>
-              <div className="text-3xl mb-3">🍽️</div>
-              <h3 className="text-xl font-bold mb-2">Eat</h3>
-              <p className="text-zinc-400 text-sm">
-                No more wasting money on mid food
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Final CTA */}
-        <div className="max-w-4xl mx-auto text-center py-20 border-t border-zinc-800">
-          <h2 className="text-4xl font-bold mb-4">Hungry right now?</h2>
-          <p className="text-zinc-400 mb-8">Stop scrolling. Start eating.</p>
-          <Link
-            href="/best-of"
-            className="inline-block bg-gradient-to-r from-orange-600 to-red-600 text-white px-8 py-4 rounded-xl text-lg font-bold hover:from-orange-700 hover:to-red-700 transition-all"
-          >
-            Explore Best Of
+              Sign Up
+            </Button>
           </Link>
         </div>
-      </main>
+      </header>
 
-      {/* Footer - Minimal */}
-      <footer className="border-t border-zinc-800 bg-black">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-zinc-500 text-sm">© 2025 Hood Eats. Jersey City.</p>
-            <Link 
-              href="/auth/signup"
-              className="text-sm text-zinc-400 hover:text-white transition-colors"
-            >
-              Add your spot →
+      {/* Hero Section */}
+      <section className="py-12 md:py-20 px-6 border-b-4 border-foreground">
+        <div className="max-w-4xl mx-auto text-center">
+          <Badge className="mb-6 text-base px-4 py-2 bg-secondary text-secondary-foreground border-2 border-foreground">
+            Rate · Browse · Discover
+          </Badge>
+          <h2 className="text-4xl md:text-6xl font-bold text-foreground mb-6 leading-tight text-balance">
+            Find the Top 10 Best Dishes in Any Jersey City Neighborhood
+          </h2>
+          <p className="text-xl md:text-2xl text-muted-foreground mb-8 leading-relaxed max-w-2xl mx-auto">
+            Hood Eats is your guide to the absolute best dishes in Jersey City. Rate, review, and discover what the
+            block is eating.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/best-of">
+              <Button
+                size="lg"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-lg border-2 border-foreground shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+              >
+                Browse Neighborhoods
+              </Button>
+            </Link>
+            <Link href="/restaurants/new">
+              <Button
+                size="lg"
+                variant="outline"
+                className="bg-background text-foreground hover:bg-muted font-bold text-lg border-2 border-foreground shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] transition-all"
+              >
+                Add a Dish
+              </Button>
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Top 10 Lists */}
+      <section className="py-12 md:py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12">
+            {/* Downtown Top 10 */}
+            <div>
+              <div className="mb-8">
+                <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-2 text-balance">
+                  Top 10 in Downtown JC
+                </h3>
+                <p className="text-lg text-muted-foreground">The neighborhood's absolute best dishes right now</p>
+              </div>
+              <Card className="border-4 border-foreground shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-card">
+                <div className="divide-y-2 divide-border">
+                  {downtownTop10.map((item) => (
+                    <div key={item.rank} className="p-4 hover:bg-muted transition-colors cursor-pointer">
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0">
+                          <div className="w-12 h-12 bg-primary text-primary-foreground border-2 border-foreground flex items-center justify-center font-bold text-xl">
+                            {item.rank}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-foreground text-lg leading-tight mb-1">{item.dish}</h4>
+                          <p className="text-muted-foreground text-sm">{item.restaurant}</p>
+                        </div>
+                        <div className="flex-shrink-0 text-right">
+                          <div className="font-bold text-lg text-secondary">{item.rating}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+
+            {/* Best Tacos */}
+            <div>
+              <div className="mb-8">
+                <h3 className="text-3xl md:text-4xl font-bold text-foreground mb-2 text-balance">Top 10 Tacos</h3>
+                <p className="text-lg text-muted-foreground">The best tacos across all neighborhoods</p>
+              </div>
+              <Card className="border-4 border-foreground shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-card">
+                <div className="divide-y-2 divide-border">
+                  {bestTacos.map((item) => (
+                    <div key={item.rank} className="p-4 hover:bg-muted transition-colors cursor-pointer">
+                      <div className="flex gap-4">
+                        <div className="flex-shrink-0">
+                          <div className="w-12 h-12 bg-primary text-primary-foreground border-2 border-foreground flex items-center justify-center font-bold text-xl">
+                            {item.rank}
+                          </div>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-foreground text-lg leading-tight mb-1">{item.dish}</h4>
+                          <p className="text-muted-foreground text-sm">
+                            {item.restaurant} · {item.neighborhood}
+                          </p>
+                        </div>
+                        <div className="flex-shrink-0 text-right">
+                          <div className="font-bold text-lg text-secondary">{item.rating}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-12 md:py-20 px-6 border-t-4 border-foreground bg-muted">
+        <div className="max-w-3xl mx-auto text-center">
+          <h3 className="text-3xl md:text-5xl font-bold text-foreground mb-6 text-balance">Ready to Bite the Block?</h3>
+          <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
+            Join Hood Eats and start rating the best dishes in Jersey City.
+          </p>
+          <Link href="/auth/signup">
+            <Button
+              size="lg"
+              className="bg-primary text-primary-foreground hover:bg-primary/90 font-bold text-xl px-8 py-6 border-2 border-foreground shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] hover:shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] transition-all"
+            >
+              Get Started Free
+            </Button>
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t-4 border-foreground py-8 px-6">
+        <div className="max-w-7xl mx-auto text-center">
+          <p className="text-muted-foreground uppercase tracking-wide font-bold">© 2026 Hood Eats · Bite the Block</p>
         </div>
       </footer>
     </div>
